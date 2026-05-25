@@ -4,7 +4,12 @@ import { useState } from "react";
 import { Button, Field } from "@navigator/design-system/components";
 import { joinWaitlist, type WaitlistResult } from "../_actions";
 
-export function WaitlistForm() {
+interface WaitlistFormProps {
+  /** Renders a compact horizontal form for use in CTA sections */
+  inline?: boolean;
+}
+
+export function WaitlistForm({ inline }: WaitlistFormProps) {
   const [result, setResult] = useState<WaitlistResult | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -17,9 +22,30 @@ export function WaitlistForm() {
 
   if (result?.ok) {
     return (
-      <p className="text-base text-fg-2" role="status">
+      <p className={inline ? "cta-success" : "text-base text-fg-2"} role="status">
         {result.message}
       </p>
+    );
+  }
+
+  if (inline) {
+    return (
+      <form action={submit} className="cta-form">
+        <input
+          type="email"
+          name="email"
+          className="cta-input"
+          placeholder="your@email.com"
+          required
+          autoComplete="email"
+        />
+        <button type="submit" className="btn btn-primary btn-lg" disabled={pending}>
+          {pending ? "Adding you…" : "Get early access"}
+        </button>
+        {result && !result.ok ? (
+          <p className="cta-error">{result.message}</p>
+        ) : null}
+      </form>
     );
   }
 
