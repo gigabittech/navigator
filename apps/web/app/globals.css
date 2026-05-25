@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom keyframes — the sync dot pulse is the one motion that loops. */
+@layer utilities {
+  @keyframes navigator-pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
+  .animate-pulse-slow {
+    animation: navigator-pulse-slow 2s var(--ease-standard) infinite;
+  }
+}
+
+/* Reset the body to use design-system tokens. */
+html,
+body {
+  background: var(--surface-page);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+}
+
+/* Honor user motion preferences. Most transitions are short already. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

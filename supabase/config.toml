@@ -1,0 +1,66 @@
+# A string used to distinguish different Supabase projects on the same machine.
+project_id = "navigator"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/**"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+# Passwordless login: enable the 6-digit OTP code path used by the sign-in flow.
+otp_length = 6
+otp_expiry = 3600
+
+# --- Production email via Resend SMTP ------------------------------------
+# Uncomment and set env in production so login emails come from your domain
+# rather than Supabase's shared sender. Pass is the RESEND_API_KEY.
+# [auth.email.smtp]
+# host = "smtp.resend.com"
+# port = 465
+# user = "resend"
+# pass = "env(RESEND_API_KEY)"
+# admin_email = "hello@navigator.app"
+# sender_name = "Navigator"
+
+[edge_runtime]
+enabled = true
+inspector_port = 8083
+
+# --- Edge Functions ------------------------------------------------------
+# Browser-invoked with the anon key; verify_jwt keeps them authenticated.
+# Secrets:  supabase secrets set ANTHROPIC_API_KEY=... OPENAI_API_KEY=...
+[functions.generate_narrative]
+verify_jwt = true
+
+[functions.transcribe_voice]
+verify_jwt = true
