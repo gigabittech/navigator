@@ -302,7 +302,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
 
         {/* Page content */}
         <main
-          className="flex-1 px-5 py-6 max-w-app lg:max-w-none lg:px-7 mx-auto w-full"
+          className="flex-1 px-5 py-6 max-w-app md:max-w-none lg:px-7 mx-auto w-full"
           style={{ paddingBottom: "calc(var(--safe-bottom) + 1.5rem)" }}
         >
           {children}

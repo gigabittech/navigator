@@ -267,7 +267,7 @@ function Problem() {
       <div className="container">
         <div style={{ maxWidth: 880 }}>
           <div className="eyebrow-section"><span className="bar"></span> The problem</div>
-          <h2 className="h-2">
+          <h2 className="mkt-h2">
             Nobody told you that you were going to become a{" "}
             <span className="it">case manager</span> for your own kid.
           </h2>
@@ -345,7 +345,7 @@ function MedTracker() {
         <div className="feat-split">
           <div className="feat-text">
             <div className="eyebrow-section"><span className="bar"></span> Feature 01 · Medication tracker</div>
-            <h2 className="h-2">
+            <h2 className="mkt-h2">
               Built for the <span className="it">hardest version</span> of the problem.
             </h2>
             <p className="lead">
@@ -404,7 +404,7 @@ function ClinicalReport() {
         <div className="feat-split reverse">
           <div className="feat-text">
             <div className="eyebrow-section"><span className="bar"></span> Feature 02 · Appointment prep</div>
-            <h2 className="h-2">
+            <h2 className="mkt-h2">
               Walk in with a clinical report. <span className="it">Not a reconstruction.</span>
             </h2>
             <p className="lead">
@@ -461,7 +461,7 @@ function HowItWorks() {
       <div className="container">
         <div style={{ maxWidth: 720 }}>
           <div className="eyebrow-section"><span className="bar"></span> How it works</div>
-          <h2 className="h-2">Log in seconds. <span className="it">Walk in prepared.</span></h2>
+          <h2 className="mkt-h2">Log in seconds. <span className="it">Walk in prepared.</span></h2>
           <p className="lead" style={{ marginTop: "var(--space-5)" }}>
             Designed for the parent doing this between school pickup and dinner. Three steps,
             repeated daily. The fourth happens once every 90 days.
@@ -507,7 +507,7 @@ function FeatureRow() {
       <div className="container">
         <div style={{ maxWidth: 720 }}>
           <div className="eyebrow-section"><span className="bar"></span> What&rsquo;s inside</div>
-          <h2 className="h-2">Small details. <span className="it">Big difference.</span></h2>
+          <h2 className="mkt-h2">Small details. <span className="it">Big difference.</span></h2>
         </div>
         <div className="feat-grid">
           {features.map(f => (
@@ -537,7 +537,7 @@ function Security() {
         <div className="security">
           <div>
             <div className="eyebrow-section"><span className="bar"></span> Security &amp; privacy</div>
-            <h2 className="h-2">Your child&rsquo;s data <span className="it">stays yours.</span></h2>
+            <h2 className="mkt-h2">Your child&rsquo;s data <span className="it">stays yours.</span></h2>
             <p className="lead" style={{ marginTop: "var(--space-5)" }}>
               Navigator is built local-first. Every entry saves instantly to your device, encrypted at rest.
               Sync to our servers is encrypted end-to-end, behind a signed Business Associate Agreement.
@@ -580,7 +580,7 @@ function Testimonials() {
       <div className="container">
         <div style={{ maxWidth: 720 }}>
           <div className="eyebrow-section"><span className="bar"></span> Early access voices</div>
-          <h2 className="h-2">What beta families <span className="it">are telling us.</span></h2>
+          <h2 className="mkt-h2">What beta families <span className="it">are telling us.</span></h2>
         </div>
         <div className="testimonials">
           {quotes.map(t => (
@@ -617,7 +617,7 @@ function FAQ() {
       <div className="container">
         <div style={{ textAlign: "center", maxWidth: 720, margin: "0 auto" }}>
           <div className="eyebrow-section" style={{ justifyContent: "center" }}><span className="bar"></span> FAQ</div>
-          <h2 className="h-2">Common questions <span className="it">from parents.</span></h2>
+          <h2 className="mkt-h2">Common questions <span className="it">from parents.</span></h2>
         </div>
         <div className="faq">
           {items.map(item => (
