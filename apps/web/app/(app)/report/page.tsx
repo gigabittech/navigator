@@ -7,9 +7,258 @@ import { generateReport, type Report } from "@navigator/report";
 import type { LogEvent, Medication } from "@navigator/schema";
 import { loadReportWindow } from "@/lib/db/queries/reportWindow";
 import { useChild } from "@/lib/db/queries/useChild";
+import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
 import { generateNarrative, NarrativeUnavailableError } from "@/lib/ai/narrative";
 
 const WINDOW_DAYS = 90;
+
+/* ── Inline icons ── */
+function SparklesIcon() {
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+    </svg>
+  );
+}
+
+/* ── Report header ── */
+function ReportHeader({
+  childName,
+  rangeStart,
+  rangeEnd,
+}: {
+  childName: string;
+  rangeStart: Date;
+  rangeEnd: Date;
+}) {
+  const format = (d: Date) =>
+    d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const generatedAt = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return (
+    <div
+      style={{
+        textAlign: "center",
+        padding: "20px 16px 14px",
+        borderBottom: "1px solid rgba(14, 27, 48, 0.06)",
+        marginBottom: 16,
+      }}
+    >
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          fontSize: 11,
+          fontWeight: 700,
+          color: "var(--emerald-600)",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          marginBottom: 8,
+        }}
+      >
+        <span
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            background: "var(--emerald-600)",
+            color: "white",
+            display: "grid",
+            placeItems: "center",
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+        >
+          N
+        </span>
+        Navigator
+      </div>
+      <h2
+        style={{
+          fontSize: 22,
+          fontWeight: 700,
+          margin: "0 0 4px",
+          letterSpacing: "-0.02em",
+          color: "var(--fg-1)",
+        }}
+      >
+        90-Day Summary
+      </h2>
+      <div
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          color: "var(--fg-4)",
+        }}
+      >
+        {childName} · {format(rangeStart)} – {format(rangeEnd)} · Generated {generatedAt}
+      </div>
+    </div>
+  );
+}
+
+/* ── Pre-visit AI summary banner ── */
+function PreVisitBanner({ itemCount }: { itemCount: number }) {
+  const appt = useNextAppointment();
+
+  if (!appt) return null;
+
+  const apptDate = new Date(appt.scheduledFor);
+  const dateLabel = apptDate.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
+  const withLabel = appt.with ?? appt.kind;
+
+  return (
+    <div
+      style={{
+        padding: "10px 14px",
+        background: "linear-gradient(135deg, rgba(201, 168, 76, 0.10), rgba(15, 110, 86, 0.06))",
+        border: "1px solid rgba(201, 168, 76, 0.18)",
+        borderRadius: 12,
+        fontSize: 12.5,
+        color: "var(--fg-2)",
+        marginBottom: 16,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span style={{ color: "#C9A84C", flexShrink: 0 }}>
+        <SparklesIcon />
+      </span>
+      <span>
+        <strong>Pre-visit summary</strong> for {dateLabel} with {withLabel}.{" "}
+        {itemCount} thing{itemCount === 1 ? "" : "s"} worth raising.
+      </span>
+    </div>
+  );
+}
+
+/* ── Section stat with direction badge ── */
+function SectionStat({
+  value,
+  direction,
+  badge,
+}: {
+  value: string;
+  direction: "up" | "flag";
+  badge: string;
+}) {
+  const dirStyles: Record<"up" | "flag", React.CSSProperties> = {
+    up: {
+      background: "rgba(15, 110, 86, 0.10)",
+      color: "var(--emerald-700)",
+    },
+    flag: {
+      background: "rgba(245, 158, 11, 0.14)",
+      color: "var(--amber-600)",
+    },
+  };
+
+  return (
+    <div
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: 14,
+        fontWeight: 600,
+        color: "var(--fg-1)",
+        whiteSpace: "nowrap",
+        textAlign: "right",
+        flexShrink: 0,
+      }}
+    >
+      {value}
+      <br />
+      <span
+        style={{
+          display: "inline-block",
+          marginTop: 4,
+          fontSize: 10,
+          fontWeight: 700,
+          padding: "2px 6px",
+          borderRadius: 9999,
+          ...dirStyles[direction],
+        }}
+      >
+        {badge}
+      </span>
+    </div>
+  );
+}
+
+/* ── Section row ── */
+function SectionRow({
+  section,
+}: {
+  section: Report["sections"][number];
+}) {
+  // Heuristically assign a stat and direction from section data
+  // The real stat lives in the section body text; we extract first number if present
+  const numMatch = section.body.match(/(\d+(?:\.\d+)?)\s*%?/);
+  const stat = numMatch ? numMatch[0].trim() : "—";
+  const direction: "up" | "flag" =
+    section.title.toLowerCase().includes("pattern") ||
+    section.title.toLowerCase().includes("trigger") ||
+    section.title.toLowerCase().includes("flag")
+      ? "flag"
+      : "up";
+  const badge = direction === "up" ? "▲" : "flag";
+
+  return (
+    <div
+      style={{
+        padding: "14px 0",
+        borderBottom: "1px solid rgba(14, 27, 48, 0.05)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "var(--fg-4)",
+          marginBottom: 4,
+        }}
+      >
+        {section.title}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "start",
+          gap: 12,
+        }}
+      >
+        <p
+          className="text-sm text-fg-2"
+          style={{ margin: 0, lineHeight: 1.5, whiteSpace: "pre-line" }}
+        >
+          {section.body}
+        </p>
+        <SectionStat value={stat} direction={direction} badge={badge} />
+      </div>
+    </div>
+  );
+}
 
 export default function ReportPage() {
   const db = usePGlite();
@@ -111,8 +360,18 @@ export default function ReportPage() {
         </Card>
       ) : (
         <>
+          {/* Branded report header */}
           <Card>
-            <p className="eyebrow mb-2">{report.child.preferredName}</p>
+            <ReportHeader
+              childName={report.child.preferredName}
+              rangeStart={new Date(report.rangeStart)}
+              rangeEnd={new Date(report.rangeEnd)}
+            />
+
+            {/* Pre-visit AI summary banner */}
+            <PreVisitBanner itemCount={report.sections.length} />
+
+            {/* Highlight stats */}
             <div className="grid grid-cols-2 gap-4">
               <Highlight value={`${report.highlights.adherenceRate}%`} label="Adherence" />
               <Highlight value={`${report.highlights.daysCovered}`} label="Days covered" />
@@ -121,6 +380,7 @@ export default function ReportPage() {
             </div>
           </Card>
 
+          {/* AI narrative summary */}
           {report.narrative ? (
             <Card>
               <h2 className="text-lg font-semibold mb-1">Summary</h2>
@@ -128,12 +388,14 @@ export default function ReportPage() {
             </Card>
           ) : null}
 
-          {report.sections.map((s) => (
-            <Card key={s.id} alt elevation="flat">
-              <h2 className="text-lg font-semibold mb-1">{s.title}</h2>
-              <p className="text-sm text-fg-2 whitespace-pre-line">{s.body}</p>
+          {/* Section rows with stat badges */}
+          {report.sections.length > 0 ? (
+            <Card alt elevation="flat">
+              {report.sections.map((s) => (
+                <SectionRow key={s.id} section={s} />
+              ))}
             </Card>
-          ))}
+          ) : null}
 
           <div className="flex flex-wrap gap-2">
             <Button onClick={exportPdf} disabled={exporting}>
