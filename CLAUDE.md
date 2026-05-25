@@ -126,12 +126,12 @@ state library. The stack above is the stack.
 
 ### Data access
 
-- `apps/web/lib/db/client.ts` — the wa-sqlite + Electric initialiser.
+- `apps/web/lib/db/client.ts` — the PGlite initialiser (WASM Postgres, IndexedDB persistence).
 - `apps/web/lib/db/queries/` — query functions (`getDosesForToday`,
   `getTimelineEvents`). One function per file. They wrap `useLiveQuery`.
 - `apps/web/lib/db/mutations/` — mutation functions (`logDoseEvent`,
-  `correctDoseEvent`). They INSERT into `log_events` and let Electric do
-  the rest.
+  `correctDoseEvent`). They INSERT into `log_events`; sync is handled
+  out-of-band by the Electric layer (deferred, not wired in MVP).
 
 ### Server actions
 
@@ -181,7 +181,7 @@ Run: `pnpm test`. CI fails on any test failure or coverage drop in
 - Time to interactive on the `/today` route, 4G simulated: **< 1.5s**
 - Dose-log tap to UI update: **< 50ms** (it's a local INSERT — there's no
   excuse)
-- Bundle for the app shell (excluding wa-sqlite WASM): **< 250 KB gzipped**
+- Bundle for the app shell (excluding PGlite WASM): **< 250 KB gzipped**
 
 If you add a dependency that breaks any of these, justify it in the PR.
 

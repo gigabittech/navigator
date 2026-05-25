@@ -1,6 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Cross-origin isolation headers required for SharedArrayBuffer (PGlite WASM).
+  // PWA install also benefits from this.
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+        ],
+      },
+    ];
+  },
   experimental: {
     // Allow importing TS source files from workspace packages directly,
     // so we don't need a separate build step for design-system / schema.
