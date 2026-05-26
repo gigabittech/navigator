@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button, Card, Pill } from "@navigator/design-system/components";
 import {
@@ -9,9 +9,12 @@ import {
   EventType,
   type LogEvent,
 } from "@navigator/schema";
+import { usePGlite, useLiveQuery } from "@electric-sql/pglite-react";
 import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
 import { useTimeline } from "@/lib/db/queries/useTimeline";
 import { formatClock } from "@/lib/time";
+import { APPOINTMENT_COLUMNS } from "@/lib/db/sql";
+import type { AppointmentRow } from "@/lib/db/types";
 
 const PREP_WINDOW_DAYS = 14;
 
@@ -211,6 +214,297 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
   );
 }
 
+/* ── Add appointment form ── */
+
+function AddAppointmentForm({ onSaved }: { onSaved: () => void }) {
+  const db = usePGlite();
+  const [providerName, setProviderName] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const providerRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    providerRef.current?.focus();
+  }, []);
+
+  async function save() {
+    if (!providerName.trim()) {
+      setError("Enter the provider name.");
+      return;
+    }
+    if (!date) {
+      setError("Choose an appointment date.");
+      return;
+    }
+    setError(null);
+    setSaving(true);
+    try {
+      const scheduledFor = time ? `${date}T${time}:00` : `${date}T00:00:00`;
+      const childRes = await db.query<{ id: string }>(
+        "SELECT id FROM children ORDER BY created_at LIMIT 1",
+      );
+      const childId = childRes.rows[0]?.id;
+      if (!childId) throw new Error("No child on this device.");
+      await db.query(
+        `INSERT INTO appointments (child_id, kind, "with", scheduled_for, prep_notes)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          childId,
+          "Appointment",
+          providerName.trim(),
+          scheduledFor,
+          notes.trim() || null,
+        ],
+      );
+      onSaved();
+    } catch {
+      setError("Couldn't save that. It's still on this device.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      style={{
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-card)",
+        borderRadius: 16,
+        padding: "16px",
+        marginTop: 8,
+      }}
+    >
+      <p className="text-sm font-semibold text-fg-1 mb-3">New appointment</p>
+      <div className="flex flex-col gap-3">
+        <div>
+          <label
+            className="text-xs text-fg-3 mb-1 block"
+            htmlFor="appt-provider"
+          >
+            Doctor or provider
+          </label>
+          <input
+            id="appt-provider"
+            ref={providerRef}
+            type="text"
+            value={providerName}
+            onChange={(e) => setProviderName(e.target.value)}
+            placeholder="Dr. Alvarez"
+            disabled={saving}
+            className="w-full rounded-xl border border-border-card bg-surface-input px-3.5 py-2.5 text-sm text-fg-1 placeholder:text-fg-4 focus:outline-none focus-within:border-border-accent disabled:opacity-50"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-fg-3 mb-1 block" htmlFor="appt-date">
+              Date
+            </label>
+            <input
+              id="appt-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              disabled={saving}
+              className="w-full rounded-xl border border-border-card bg-surface-input px-3.5 py-2.5 text-sm text-fg-1 focus:outline-none focus-within:border-border-accent disabled:opacity-50"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-fg-3 mb-1 block" htmlFor="appt-time">
+              Time (optional)
+            </label>
+            <input
+              id="appt-time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              disabled={saving}
+              className="w-full rounded-xl border border-border-card bg-surface-input px-3.5 py-2.5 text-sm text-fg-1 focus:outline-none focus-within:border-border-accent disabled:opacity-50"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-fg-3 mb-1 block" htmlFor="appt-notes">
+            Notes (optional)
+          </label>
+          <textarea
+            id="appt-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            placeholder="What to bring up at this visit…"
+            disabled={saving}
+            className="w-full resize-none rounded-xl border border-border-card bg-surface-input px-3.5 py-2.5 text-sm text-fg-1 placeholder:text-fg-4 focus:outline-none focus-within:border-border-accent disabled:opacity-50"
+          />
+        </div>
+        {error ? (
+          <p className="text-xs text-danger-fg" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onSaved}
+            disabled={saving}
+            className="min-h-tap flex flex-1 items-center justify-center rounded-xl border border-border-strong bg-transparent text-sm font-semibold text-fg-1 transition-colors duration-fast hover:bg-surface-card-alt focus:outline-none focus-visible:ring-2 focus-visible:ring-border-accent disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => void save()}
+            disabled={saving}
+            className="min-h-tap flex flex-1 items-center justify-center rounded-xl text-sm font-semibold text-white transition-opacity duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot disabled:opacity-50"
+            style={{
+              background: "var(--emerald-600)",
+              boxShadow: "0 8px 20px -6px rgba(15,110,86,0.40)",
+            }}
+          >
+            {saving ? "Saving…" : "Save appointment"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Upcoming appointments list ── */
+
+function UpcomingAppointments() {
+  const db = usePGlite();
+  const [showForm, setShowForm] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const res = useLiveQuery<AppointmentRow>(
+    `SELECT ${APPOINTMENT_COLUMNS} FROM appointments
+     WHERE scheduled_for >= now() ORDER BY scheduled_for ASC`,
+    [],
+  );
+  const appointments = res?.rows ?? [];
+
+  function handleSaved() {
+    setShowForm(false);
+    setSaved(true);
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    savedTimerRef.current = setTimeout(() => setSaved(false), 2000);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
+
+  async function deleteAppointment(id: string) {
+    await db.query("DELETE FROM appointments WHERE id = $1", [id]);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            color: "var(--fg-4)",
+            textTransform: "uppercase",
+          }}
+        >
+          Upcoming appointments
+        </p>
+        {!showForm ? (
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            className="text-xs font-semibold text-accent-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-border-accent"
+          >
+            Add appointment
+          </button>
+        ) : null}
+      </div>
+
+      {saved ? (
+        <p className="text-xs text-fg-3 mb-2" role="status">
+          Appointment saved.
+        </p>
+      ) : null}
+
+      {showForm ? (
+        <AddAppointmentForm onSaved={handleSaved} />
+      ) : null}
+
+      {appointments.length === 0 && !showForm ? (
+        <p className="text-sm text-fg-3">
+          No upcoming appointments. Add one to start preparing.
+        </p>
+      ) : (
+        <div
+          style={{
+            background: "white",
+            border: "1px solid rgba(14, 27, 48, 0.06)",
+            borderRadius: 16,
+            padding: "6px 0",
+            boxShadow: "0 1px 2px rgba(14, 27, 48, 0.04)",
+            marginTop: showForm ? 8 : 0,
+          }}
+        >
+          {appointments.map((appt, idx) => {
+            const apptDate = new Date(appt.scheduledFor);
+            const dateLabel = apptDate.toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            });
+            const timeLabel = formatClock(apptDate);
+            return (
+              <div
+                key={appt.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 16px",
+                  borderBottom:
+                    idx < appointments.length - 1
+                      ? "1px solid rgba(14, 27, 48, 0.04)"
+                      : "none",
+                }}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-fg-1 truncate">
+                    {appt.with ?? appt.kind}
+                  </p>
+                  <p
+                    className="text-xs text-fg-3 mt-0.5"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {dateLabel} · {timeLabel}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void deleteAppointment(appt.id)}
+                  className="text-xs text-fg-4 hover:text-danger-fg transition-colors duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-border-accent shrink-0 min-h-tap flex items-center"
+                  aria-label={`Remove appointment with ${appt.with ?? appt.kind}`}
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── PrepPage ── */
+
 export default function PrepPage() {
   const appointment = useNextAppointment();
   const events = useTimeline(400);
@@ -300,15 +594,12 @@ export default function PrepPage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold tracking-tight">Appointment prep</h1>
 
+      {/* Appointment scheduling — add / view upcoming */}
+      <UpcomingAppointments />
+
       {appointment ? (
         <PrepBanner appointment={appointment} />
-      ) : (
-        <Card alt>
-          <p className="text-sm text-fg-3">
-            No appointment scheduled. The summary below is ready whenever one comes up.
-          </p>
-        </Card>
-      )}
+      ) : null}
 
       {/* Top changes to discuss — interactive checklist */}
       <div>

@@ -18,12 +18,16 @@ import {
 import { SyncDot } from "@navigator/design-system/components";
 import { useChild } from "@/lib/db/queries/useChild";
 import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
+import { useAuthUser } from "@/lib/auth/useAuthUser";
+import { useSyncState } from "@/lib/auth/useSyncState";
+import { isSupabaseConfigured } from "@/lib/config";
 
 /* ── Bottom tab bar (mobile only) ─────────────────────────── */
 
 const TABS = [
   { href: "/today", label: "Today", icon: CalendarCheck },
   { href: "/timeline", label: "Timeline", icon: ListOrdered },
+  { href: "/patterns", label: "Patterns", icon: TrendingUp },
   { href: "/report", label: "Report", icon: FileText },
   { href: "/prep", label: "Prep", icon: ClipboardList },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -85,6 +89,7 @@ function getInitials(name: string): string {
 function DesktopSidebar({ pathname }: { pathname: string }) {
   const child = useChild();
   const nextAppt = useNextAppointment();
+  const authUser = useAuthUser();
 
   const apptDate =
     nextAppt?.scheduledFor && isWithin14Days(new Date(nextAppt.scheduledFor))
@@ -219,11 +224,33 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
           style={{ background: "rgba(252,251,246,0.12)" }}
           aria-hidden
         >
-          {childInitials.slice(0, 1)}
+          {authUser?.email
+            ? authUser.email.charAt(0).toUpperCase()
+            : childInitials.slice(0, 1)}
         </span>
-        <div className="min-w-0">
-          <div className="text-[#F9F8F4] font-semibold truncate text-[12px]">Your account</div>
-          <div className="text-[11px] truncate text-[rgba(252,251,246,0.50)]">Sign in to sync</div>
+        <div className="min-w-0 flex-1">
+          {isSupabaseConfigured() && authUser ? (
+            <>
+              <div className="text-[#F9F8F4] font-semibold truncate text-[12px]">
+                {authUser.email ?? "Signed in"}
+              </div>
+              <div className="text-[11px] truncate text-[rgba(252,251,246,0.50)]">
+                Your account
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-[#F9F8F4] font-semibold truncate text-[12px]">
+                Local mode
+              </div>
+              <Link
+                href="/sign-in"
+                className="text-[11px] truncate text-[rgba(252,251,246,0.50)] hover:text-[rgba(252,251,246,0.75)] transition-colors"
+              >
+                Sign in
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </aside>
@@ -233,6 +260,7 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
 /* ── Top bar (desktop only) ──────────────────────────────── */
 
 function DesktopTopbar() {
+  const syncState = useSyncState();
   return (
     <div
       className="hidden lg:flex items-center justify-between gap-4 px-7 h-[52px]
@@ -260,7 +288,7 @@ function DesktopTopbar() {
 
       {/* Right controls */}
       <div className="flex items-center gap-3 ml-auto shrink-0">
-        <SyncDot state="synced" showLabel />
+        <SyncDot state={syncState} showLabel />
         <button
           type="button"
           className="w-9 h-9 rounded-[10px] bg-surface-card border border-border-card
@@ -283,6 +311,7 @@ function DesktopTopbar() {
  */
 export function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const syncState = useSyncState();
 
   return (
     <div className="min-h-screen flex bg-surface-page">
@@ -297,7 +326,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
         {/* Mobile header — hidden on desktop */}
         <header className="lg:hidden sticky top-0 z-10 flex items-center justify-between h-12 px-5 border-b border-border-subtle bg-surface-card/85 backdrop-blur">
           <span className="font-semibold text-fg-1">Navigator</span>
-          <SyncDot state="synced" showLabel />
+          <SyncDot state={syncState} showLabel />
         </header>
 
         {/* Page content */}

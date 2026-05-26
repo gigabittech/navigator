@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { usePGlite } from "@electric-sql/pglite-react";
 import { Button, Card, Pill } from "@navigator/design-system/components";
 import { useMedications } from "@/lib/db/queries/useMedications";
@@ -9,12 +10,16 @@ import { resetLocalData, stopMedication } from "@/lib/db/mutations/medications";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { formatDose } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/config";
+import { createBrowserClient } from "@/lib/auth/supabase";
+import { useAuthUser } from "@/lib/auth/useAuthUser";
 import { MedicationForm } from "./_components/MedicationForm";
 
 export default function SettingsPage() {
   const db = usePGlite();
   const child = useChild();
   const meds = useMedications();
+  const user = useAuthUser();
+  const router = useRouter();
   const [theme, setTheme] = useState<Theme>("light");
   const [busy, setBusy] = useState(false);
 
@@ -51,6 +56,12 @@ export default function SettingsPage() {
     setBusy(true);
     await resetLocalData(db);
     window.location.reload();
+  }
+
+  async function handleSignOut() {
+    const supabase = createBrowserClient();
+    await supabase.auth.signOut();
+    router.push("/sign-in");
   }
 
   return (
@@ -136,13 +147,21 @@ export default function SettingsPage() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-semibold text-fg-2">Account</h2>
-        <Card alt elevation="flat" className="p-4">
-          <p className="text-sm text-fg-2">
-            {isSupabaseConfigured()
-              ? "Signed in. Your log syncs across your devices."
-              : "Local single-device mode. Sign-in and cross-device sync turn on once a backend is connected."}
-          </p>
-        </Card>
+        {isSupabaseConfigured() && user ? (
+          <Card alt elevation="flat" className="p-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-medium text-fg-1">{user.email ?? "Signed in"}</div>
+              <div className="text-xs text-fg-3 mt-0.5">Your account</div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              Sign out
+            </Button>
+          </Card>
+        ) : (
+          <Card alt elevation="flat" className="p-4">
+            <p className="text-sm text-fg-3">Local mode — data saved to this device only.</p>
+          </Card>
+        )}
       </section>
     </div>
   );

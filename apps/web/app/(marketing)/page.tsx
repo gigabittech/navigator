@@ -680,20 +680,17 @@ function Footer() {
           <div className="footer-col">
             <h5>Company</h5>
             <ul>
-              <li><a href="#">About</a></li>
+              <li><Link href="/about">About</Link></li>
               <li><Link href="/story">Story</Link></li>
-              <li><a href="#">Press</a></li>
               <li><a href="mailto:hello@getnavigator.app">Contact</a></li>
               <li><a href="#waitlist">Join the waitlist</a></li>
             </ul>
           </div>
           <div className="footer-col">
-            <h5>Resources</h5>
+            <h5>Legal</h5>
             <ul>
-              <li><a href="#">For clinicians</a></li>
-              <li><a href="#">Sample report (PDF)</a></li>
-              <li><a href="#">Privacy</a></li>
-              <li><a href="#">Terms</a></li>
+              <li><Link href="/privacy">Privacy policy</Link></li>
+              <li><Link href="/terms">Terms of service</Link></li>
               <li><a href="#security">Security</a></li>
             </ul>
           </div>

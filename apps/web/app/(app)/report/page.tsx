@@ -336,7 +336,7 @@ export default function ReportPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" data-testid="report-content">
       <header className="flex items-baseline justify-between">
         <h1 className="text-2xl font-bold tracking-tight">90-day report</h1>
       </header>

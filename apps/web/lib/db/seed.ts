@@ -15,20 +15,26 @@ import { EventType } from "@navigator/schema/event-types";
 import { slotIso } from "../time.js";
 import { getClientId } from "./client.js";
 
-export async function seedIfEmpty(db: PGliteInterface): Promise<void> {
+export async function seedIfEmpty(
+  db: PGliteInterface,
+  userId?: string,
+  userEmail?: string,
+): Promise<void> {
   const existing = await db.query<{ count: number }>(
     "SELECT count(*)::int AS count FROM children",
   );
   if ((existing.rows[0]?.count ?? 0) > 0) return;
 
+  const effectiveEmail = userEmail ?? "demo@navigator.local";
+
   const clientId = getClientId();
 
   const profileRes = await db.query<{ id: string }>(
-    `INSERT INTO profiles (email, full_name, role)
-     VALUES ($1, $2, 'parent')
+    `INSERT INTO profiles (id, email, full_name, role)
+     VALUES ($1, $2, $3, 'parent')
      ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name
      RETURNING id`,
-    ["demo@navigator.local", "Demo Parent"],
+    [userId ?? crypto.randomUUID(), effectiveEmail, "Demo Parent"],
   );
   const profileId = profileRes.rows[0]!.id;
 

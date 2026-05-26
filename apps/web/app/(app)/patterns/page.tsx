@@ -34,7 +34,7 @@ export default function PatternsPage() {
         <PageHeader />
         <Card alt>
           <p className="text-sm text-fg-3">
-            Nothing logged yet — patterns will appear after a few days of logging.
+            Nothing logged yet. Start from the Today tab to track adherence here.
           </p>
         </Card>
       </div>
@@ -247,7 +247,7 @@ function TriggerClustersChart({ triggers }: TriggerClustersChartProps) {
       </div>
 
       {isEmpty ? (
-        <p className="text-sm text-fg-3">No tagged observations yet.</p>
+        <p className="text-sm text-fg-3">No observations recorded this month.</p>
       ) : (
         <div
           role="list"

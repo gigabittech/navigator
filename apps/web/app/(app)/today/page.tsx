@@ -40,7 +40,7 @@ export default function TodayPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" data-testid="today-page">
         <header className="flex items-baseline justify-between">
           <h1 className="text-2xl font-bold tracking-tight">{greeting}</h1>
         </header>

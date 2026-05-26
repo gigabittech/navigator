@@ -4,7 +4,7 @@ import { isSupabaseConfigured } from "@/lib/config";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
-const APP_PREFIXES = ["/today", "/timeline", "/report", "/prep", "/settings"];
+const APP_PREFIXES = ["/today", "/timeline", "/report", "/prep", "/settings", "/patterns"];
 
 /**
  * Auth gate for the `/(app)` segment. Marketing routes pass through untouched.

@@ -50,7 +50,7 @@ export default function TimelinePage() {
             {group.items.map((e) => {
               const d = describeEvent(e, medName);
               return (
-                <Card key={e.id} alt elevation="flat" className="p-4">
+                <Card key={e.id} alt elevation="flat" className="p-4" data-testid="timeline-event">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-base font-medium text-fg-1 truncate">{d.title}</p>
