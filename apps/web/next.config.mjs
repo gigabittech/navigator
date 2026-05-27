@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: "standalone",
   // Cross-origin isolation headers required for SharedArrayBuffer (PGlite WASM).
   // PWA install also benefits from this.
   async headers() {
