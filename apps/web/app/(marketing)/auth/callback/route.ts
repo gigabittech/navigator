@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerSupabase } from "@/lib/auth/supabase";
+import { createServerSupabase } from "@/lib/auth/supabase-server";
 import { isSupabaseConfigured } from "@/lib/config";
 
 /**
