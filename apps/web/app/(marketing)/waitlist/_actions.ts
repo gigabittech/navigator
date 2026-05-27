@@ -76,7 +76,10 @@ export async function joinWaitlist(formData: FormData): Promise<WaitlistResult> 
     try {
       const resend = new Resend(apiKey);
       await resend.emails.send({
-        from: process.env.WAITLIST_FROM ?? "Navigator <onboarding@resend.dev>",
+        from:
+          process.env.WAITLIST_FROM ??
+          process.env.RESEND_FROM ??
+          "Navigator <onboarding@resend.dev>",
         to: email,
         subject: "You're on the Navigator waitlist",
         html: `<p>You're on the list. We'll send one note when it's your turn — nothing else.</p>${

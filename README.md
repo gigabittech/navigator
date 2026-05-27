@@ -84,6 +84,35 @@ Open `http://localhost:3000` for marketing, `http://localhost:3000/today` for th
 
 ---
 
+## Dokploy
+
+Use the repo root as the build context. This project is a `pnpm` monorepo, and
+the Next.js app in `apps/web` depends on workspace packages under `packages/`.
+Pointing Dokploy at `apps/web` by itself will fail because those workspace
+dependencies are not available there alone.
+
+Recommended Dokploy settings:
+
+- Build Type: `Dockerfile`
+- Dockerfile Path: `./Dockerfile`
+- Docker Context Path: `.`
+- Port: `3000`
+
+If you prefer Dokploy's default `Nixpacks` build type, keep the build path at the
+repo root and use the checked-in [nixpacks.toml](./nixpacks.toml). Do not point
+the build path at `apps/web`, or the workspace packages under `packages/` will
+not be available during the build.
+
+Required environment variables for production:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY` if you want waitlist emails enabled
+- `WAITLIST_FROM` for your sender identity
+
+---
+
 ## Architecture in one minute
 
 - **Local-first.** Every read and write hits a local SQLite (wa-sqlite) running in the browser. The UI never waits for the network.
