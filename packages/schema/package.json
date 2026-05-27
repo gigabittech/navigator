@@ -6,15 +6,18 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "import": "./src/index.ts"
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
     },
     "./event-types": {
       "types": "./src/event-types.ts",
-      "import": "./src/event-types.ts"
+      "import": "./src/event-types.ts",
+      "require": "./src/event-types.ts"
     },
     "./projections": {
       "types": "./src/projections.ts",
-      "import": "./src/projections.ts"
+      "import": "./src/projections.ts",
+      "require": "./src/projections.ts"
     }
   },
   "files": ["src"],
