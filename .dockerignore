@@ -1,0 +1,11 @@
+node_modules
+.git
+.github
+.turbo
+apps/web/.next
+coverage
+dist
+.env
+.env.local
+.env.*.local
+pnpm-debug.log

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "navigator",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter=@navigator/web", "exec", "next", "dev", "--port", "3001"],
+      "port": 3001
+    }
+  ]
+}

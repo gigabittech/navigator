@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "supabase.supabase-vscode",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg"
+  ]
+}

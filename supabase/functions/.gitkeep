@@ -1,0 +1,13 @@
+# Supabase Edge Functions live here.
+#
+# Planned:
+#   - generate_report/   Pulls 90 days of log_events, calls @navigator/report
+#                        in a Deno runtime, then Claude for narrative, then
+#                        returns a structured Report + narrative.
+#   - transcribe_voice/  Receives an audio blob, calls OpenAI Whisper,
+#                        emits a `VoiceEntryTranscribed` log_event.
+#   - waitlist_signup/   Validates + inserts into waitlist, sends magic
+#                        confirmation email.
+#
+# Service-role key + Anthropic/OpenAI keys live as Supabase secrets,
+# never in NEXT_PUBLIC_* envs.

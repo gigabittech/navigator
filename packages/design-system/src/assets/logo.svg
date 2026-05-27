@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" fill="none">
+  
+  <circle cx="30" cy="30" r="24" fill="#0f172a" stroke="#334155" stroke-width="1.5"></circle>
+  <path d="M30 12 L38 30 L30 48 L22 30 Z" fill="#4F46E5"></path>
+  <circle cx="30" cy="30" r="3" fill="#0f172a"></circle>
+  
+  <text x="68" y="38" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="24" font-weight="700" letter-spacing="-0.02em" fill="#f1f5f9">Navigator</text>
+</svg>
