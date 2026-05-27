@@ -84,8 +84,8 @@ export DATABASE_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.c
 ./scripts/run-migrations.sh
 ```
 
-This runs `db/migrations/0001_init.sql` then `db/migrations/0002_rls_policies.sql`
-in order.
+This runs every SQL file in `db/migrations/` in lexical order, including the
+waitlist table migration `0003_waitlist.sql`.
 
 ### 4. Link the Supabase CLI
 
@@ -166,8 +166,9 @@ In Vercel's project settings under **Environment Variables**, add:
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://abcdefgh.supabase.co` | From Supabase Dashboard → API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...` | From Supabase Dashboard → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` | Required for waitlist DB inserts. Server-side only. |
 | `RESEND_API_KEY` | `re_...` | From Resend Dashboard |
-| `RESEND_FROM` | `Navigator <hello@yourdomain.com>` | Sender identity for waitlist emails |
+| `WAITLIST_FROM` | `Navigator <hello@yourdomain.com>` | Verified sender identity for waitlist emails |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | `navigator.app` | Optional. Leave blank to disable analytics. |
 
 Do not add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` here — those live in
@@ -223,8 +224,10 @@ supabase stop
 | `NEXT_PUBLIC_SUPABASE_URL` | For auth + sync | Supabase Dashboard → Settings → API | Leave blank for local-only mode |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For auth + sync | Supabase Dashboard → Settings → API | Safe to expose to browser |
 | `NEXT_PUBLIC_ELECTRIC_URL` | No (deferred) | Electric dashboard | Not wired in MVP; leave blank |
-| `RESEND_API_KEY` | No | Resend Dashboard | Waitlist emails; also used as Supabase SMTP pass |
-| `RESEND_FROM` | No | Your choice | Sender identity for waitlist emails |
+| `SUPABASE_SERVICE_ROLE_KEY` | For waitlist DB writes | Supabase Dashboard → Settings → API | Server-side only; never expose to browser |
+| `RESEND_API_KEY` | For waitlist emails | Resend Dashboard | Also used as Supabase SMTP pass |
+| `WAITLIST_FROM` | For waitlist emails | A verified Resend sender/domain | Preferred sender identity |
+| `RESEND_FROM` | Legacy alias only | Your choice | Backward-compatible alias for `WAITLIST_FROM` |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | No | Your Plausible site slug | Marketing surface only; cookieless |
 | `ANTHROPIC_API_KEY` | No — Edge Fn only | Anthropic Console | Set via `supabase secrets set`, never in Vercel |
 | `OPENAI_API_KEY` | No — Edge Fn only | OpenAI Dashboard | Set via `supabase secrets set`, never in Vercel |

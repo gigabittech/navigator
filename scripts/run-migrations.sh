@@ -21,7 +21,9 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 echo "▶ Running migrations..."
-psql "$DATABASE_URL" -f "$REPO_ROOT/db/migrations/0001_init.sql"
-psql "$DATABASE_URL" -f "$REPO_ROOT/db/migrations/0002_rls_policies.sql"
+while IFS= read -r file; do
+  echo "  → $(basename "$file")"
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+done < <(find "$REPO_ROOT/db/migrations" -maxdepth 1 -type f -name '*.sql' | sort)
 
 echo "✅ Migrations complete"
