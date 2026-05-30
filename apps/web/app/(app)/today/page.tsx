@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import type { PGliteInterface } from "@electric-sql/pglite";
 import { usePGlite } from "@electric-sql/pglite-react";
 import { Card } from "@navigator/design-system/components";
@@ -14,8 +15,30 @@ import { PatternCard } from "./_components/PatternCard";
 import { QuickAddGrid } from "./_components/QuickAddGrid";
 import { TagPicker } from "./_components/TagPicker";
 import { VoiceNote } from "./_components/VoiceNote";
-import { VoiceRecorder } from "./_components/VoiceRecorder";
 import { FAB, QuickLogSheet } from "../_components/QuickLogSheet";
+
+// The voice recorder is only reached behind the quick-log sheet — never on
+// first paint. Loading it dynamically (client-only) keeps its recorder/AI
+// transcription code out of the /today First Load JS. A tiny full-screen
+// fallback covers the brief load before the overlay appears.
+const VoiceRecorder = dynamic(
+  () => import("./_components/VoiceRecorder").then((m) => m.VoiceRecorder),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay"
+        role="status"
+      >
+        <span className="sr-only">Opening the recorder</span>
+        <span
+          className="size-2 rounded-full bg-accent-500 animate-pulse-slow"
+          aria-hidden
+        />
+      </div>
+    ),
+  },
+);
 
 type ActiveOverlay = "sheet" | "voice" | "tags" | "school" | null;
 
@@ -136,36 +159,36 @@ function SchoolEventSheet({ db, onClose }: SchoolEventSheetProps) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop. Phone-style bottom sheet on mobile; centered modal on lg+. */}
       <div
         role="presentation"
-        className="fixed inset-0 z-50 bg-surface-overlay"
+        className="fixed inset-0 z-50 bg-surface-overlay lg:grid lg:place-items-center lg:p-6"
         onClick={onClose}
-      />
-
-      {/* Sheet */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Log a school event"
-        className="fixed bottom-0 left-0 right-0 z-50 bg-surface-card"
-        style={{
-          borderRadius: "24px 24px 0 0",
-          padding: "12px 20px calc(var(--safe-bottom) + 28px)",
-          boxShadow: "var(--shadow-sheet)",
-        }}
       >
-        {/* Grabber */}
+        {/* Sheet */}
         <div
-          aria-hidden
-          className="mx-auto mb-5"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log a school event"
+          onClick={(e) => e.stopPropagation()}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-surface-card
+                     rounded-t-[24px] lg:static lg:w-full lg:max-w-md lg:rounded-3xl"
           style={{
-            width: 40,
-            height: 4,
-            borderRadius: 9999,
-            background: "var(--surface-grabber)",
+            padding: "12px 20px calc(var(--safe-bottom) + 28px)",
+            boxShadow: "var(--shadow-sheet)",
           }}
-        />
+        >
+          {/* Grabber — touch affordance, hidden on the desktop modal. */}
+          <div
+            aria-hidden
+            className="mx-auto mb-5 lg:hidden"
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 9999,
+              background: "var(--surface-grabber)",
+            }}
+          />
 
         <h2 className="mb-1 text-lg font-bold tracking-snug text-fg-1">
           Log a school event
@@ -210,6 +233,7 @@ function SchoolEventSheet({ db, onClose }: SchoolEventSheetProps) {
           >
             {saving ? "Saving…" : "Save event"}
           </button>
+        </div>
         </div>
       </div>
     </>

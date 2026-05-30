@@ -19,6 +19,18 @@ import type { AppointmentRow } from "@/lib/db/types";
 
 const PREP_WINDOW_DAYS = 14;
 
+/** Tags that signal a medication wearing off. Mirrors useWearOffPattern. */
+const WEAR_OFF_TAGS = ["irritable", "wear-off", "meltdown", "anxious"];
+/** Tags that signal reduced appetite. */
+const APPETITE_TAGS = ["low appetite", "appetite", "not eating"];
+
+/** "2 pm", "3 pm", "11 am" — honest hour label from a 24h hour number. */
+function formatHour(hour: number): string {
+  const period = hour < 12 ? "am" : "pm";
+  const display = hour % 12 === 0 ? 12 : hour % 12;
+  return `${display} ${period}`;
+}
+
 /* ── Inline check icon for checkboxes ── */
 function CheckIcon() {
   return (
@@ -298,7 +310,7 @@ function AddAppointmentForm({ onSaved }: { onSaved: () => void }) {
             className="w-full rounded-xl border border-border-card bg-surface-input px-3.5 py-2.5 text-sm text-fg-1 placeholder:text-fg-4 focus:outline-none focus-within:border-border-accent disabled:opacity-50"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-fg-3 mb-1 block" htmlFor="appt-date">
               Date
@@ -522,56 +534,97 @@ export default function PrepPage() {
     const refused = snapshots.filter((s) => s.status === "refused").length;
 
     const tagCounts = new Map<string, number>();
+    // Hour buckets for wear-off-style tags, to derive a real peak time of day
+    // rather than asserting a hard-coded "3 pm".
+    const wearOffHours: number[] = [];
     for (const e of windowEvents) {
       if (e.eventType !== EventType.BehaviorObserved) continue;
       const tags = Array.isArray(e.payload["tags"]) ? (e.payload["tags"] as string[]) : [];
-      for (const t of tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+      for (const t of tags) {
+        tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+        if (WEAR_OFF_TAGS.includes(t)) {
+          wearOffHours.push(new Date(e.occurredAt).getHours());
+        }
+      }
     }
     const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
 
-    return { adherence, missed, refused, topTags, count: windowEvents.length };
+    // Modal hour across wear-off observations, if we have any.
+    let peakHour: number | null = null;
+    if (wearOffHours.length) {
+      const hourCounts = new Map<number, number>();
+      for (const h of wearOffHours) hourCounts.set(h, (hourCounts.get(h) ?? 0) + 1);
+      const top = [...hourCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+      peakHour = top ? top[0] : null;
+    }
+
+    return {
+      adherence,
+      missed,
+      refused,
+      topTags,
+      count: windowEvents.length,
+      wearOffCount: wearOffHours.length,
+      peakHour,
+    };
   }, [events]);
 
-  // Build checklist items from top tags and adherence data
+  // Build checklist items strictly from this child's logged events. Every
+  // specific (count, time of day) is computed from the data — nothing about
+  // dosing changes or clock times is asserted unless it came from a log.
   const checklistItems: ChecklistItem[] = useMemo(() => {
     const items: ChecklistItem[] = [];
 
-    if (summary.topTags.some(([t]) => ["wear-off", "irritable"].includes(t))) {
+    if (summary.wearOffCount > 0) {
+      // Only name a time if we actually have a peak hour from the logs.
+      const timePhrase =
+        summary.peakHour !== null ? ` most often around ${formatHour(summary.peakHour)}` : "";
       items.push({
         id: "wear-off",
-        title: "3 pm wear-off window appearing",
-        body: "Irritability returning after morning dose. Consider XR booster?",
+        title: `You've tagged wear-off ${summary.wearOffCount} time${summary.wearOffCount === 1 ? "" : "s"} this period`,
+        body: `Irritability or wear-off noted${timePhrase}. Worth raising at the visit.`,
       });
     }
 
-    if (summary.topTags.some(([t]) => ["low appetite"].includes(t))) {
+    const appetiteCount = summary.topTags
+      .filter(([t]) => APPETITE_TAGS.includes(t))
+      .reduce((sum, [, n]) => sum + n, 0);
+    if (appetiteCount > 0) {
       items.push({
         id: "appetite",
-        title: "Appetite suppression at dinner",
-        body: "Eating less at dinner on multiple days. Timing adjustment vs. carb load?",
+        title: `You've noted lower appetite ${appetiteCount} time${appetiteCount === 1 ? "" : "s"}`,
+        body: "Worth discussing timing with the provider.",
       });
     }
 
     if (summary.refused > 0) {
       items.push({
         id: "refusal",
-        title: `Dose refusal pattern · ${summary.refused} instance${summary.refused === 1 ? "" : "s"}`,
-        body: "Multiple refusals in the window. Worth reviewing with the provider.",
+        title: `Dose refused ${summary.refused} time${summary.refused === 1 ? "" : "s"} this period`,
+        body: "Worth reviewing with the provider.",
+      });
+    }
+
+    if (summary.missed > 0) {
+      items.push({
+        id: "missed",
+        title: `${summary.missed} missed dose${summary.missed === 1 ? "" : "s"} in the last ${PREP_WINDOW_DAYS} days`,
+        body: `Adherence is ${summary.adherence}% over this window.`,
       });
     }
 
     if (items.length === 0 && summary.count > 0) {
       items.push({
         id: "adherence",
-        title: `${summary.adherence}% adherence over last ${PREP_WINDOW_DAYS} days`,
-        body: summary.missed > 0 ? `${summary.missed} missed dose${summary.missed === 1 ? "" : "s"} in this window.` : undefined,
+        title: `${summary.adherence}% adherence over the last ${PREP_WINDOW_DAYS} days`,
+        body: "Nothing flagged this period. Bring the overview below.",
       });
     }
 
     if (items.length === 0) {
       items.push({
         id: "no-events",
-        title: "No patterns detected yet",
+        title: "Nothing logged in this window yet",
         body: "Keep logging daily — patterns emerge over 7+ days.",
       });
     }
@@ -579,18 +632,33 @@ export default function PrepPage() {
     return items;
   }, [summary]);
 
-  const openQuestions: ChecklistItem[] = [
-    {
-      id: "transition",
-      title: "School-transition episodes within expected range?",
-      body: "Flag any recent incidents or IEP updates.",
-    },
-    {
-      id: "summer",
-      title: "Heading into summer break — anything to watch?",
-      body: "Loss of structure. Sleep schedule risk.",
-    },
-  ];
+  // Generic, honest prompts — no fabricated specifics. The appointment-derived
+  // prompt only appears when there is a real upcoming appointment.
+  const openQuestions: ChecklistItem[] = useMemo(() => {
+    const items: ChecklistItem[] = [];
+
+    if (appointment) {
+      items.push({
+        id: "appt-notes",
+        title: "Anything you want to raise at this visit?",
+        body: appointment.prepNotes ?? "Jot it down before you go, so it doesn't slip.",
+      });
+    }
+
+    items.push(
+      {
+        id: "since-last",
+        title: "Anything changed since the last visit?",
+        body: "Sleep, school, side effects, or new routines.",
+      },
+      {
+        id: "whats-working",
+        title: "What's working that you want to keep?",
+      },
+    );
+
+    return items;
+  }, [appointment]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -623,7 +691,7 @@ export default function PrepPage() {
       {/* Adherence stats */}
       <Card>
         <p className="eyebrow mb-3">Last {PREP_WINDOW_DAYS} days · overview</p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 min-[380px]:gap-3">
           <Stat value={`${summary.adherence}%`} label="Adherence" />
           <Stat value={`${summary.missed}`} label="Missed" />
           <Stat value={`${summary.refused}`} label="Refused" />
@@ -675,8 +743,8 @@ export default function PrepPage() {
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div>
-      <p className="metric">{value}</p>
+    <div className="min-w-0">
+      <p className="metric truncate">{value}</p>
       <p className="text-xs text-fg-3 mt-1">{label}</p>
     </div>
   );

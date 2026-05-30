@@ -9,11 +9,29 @@ export interface ReportInput {
   rangeEnd: Date;
 }
 
+/**
+ * A headline figure a renderer can surface beside the section body, computed
+ * from the section's own data — never scraped back out of the prose. `direction`
+ * tells the renderer how to frame it: `positive` for an at-a-glance good signal
+ * (e.g. adherence), `flag` for something worth a clinician's attention.
+ */
+export interface ReportSectionStat {
+  /** Short display value, e.g. "92%", "3", "wear-off". */
+  value: string;
+  direction: "positive" | "flag";
+}
+
 export interface ReportSection {
   id: string;
   title: string;
   /** Plain-text body, paragraph-broken. Renderers wrap as appropriate. */
   body: string;
+  /**
+   * Optional headline figure derived from this section's data. Additive: older
+   * renderers ignore it. When absent, a renderer should show no stat rather
+   * than invent one.
+   */
+  stat?: ReportSectionStat;
   /** Optional structured data (tables, charts). Renderers may use or skip. */
   data?: Record<string, unknown>;
 }

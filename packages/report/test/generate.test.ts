@@ -22,6 +22,12 @@ describe("generateReport", () => {
     expect(report.highlights.adherenceRate).toBe(0);
     expect(report.highlights.eventsLogged).toBe(0);
     expect(report.sections).toHaveLength(3);
+
+    // With no data, sections derive no stat rather than inventing one.
+    const adherence = report.sections.find((s) => s.id === "adherence");
+    expect(adherence?.stat).toBeUndefined();
+    const behavior = report.sections.find((s) => s.id === "behavior_tags");
+    expect(behavior?.stat).toBeUndefined();
   });
 
   it("counts a single taken dose as 100% adherence", () => {
@@ -59,5 +65,13 @@ describe("generateReport", () => {
 
     expect(report.highlights.adherenceRate).toBe(100);
     expect(report.highlights.eventsLogged).toBe(1);
+
+    // Adherence section exposes a typed, data-derived stat — not scraped prose.
+    const adherence = report.sections.find((s) => s.id === "adherence");
+    expect(adherence?.stat).toEqual({ value: "100%", direction: "positive" });
+
+    // A single taken dose with nothing flagged surfaces the event count.
+    const timeline = report.sections.find((s) => s.id === "timeline_highlights");
+    expect(timeline?.stat).toEqual({ value: "1", direction: "positive" });
   });
 });

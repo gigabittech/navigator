@@ -104,6 +104,7 @@ function ReportHeader({
           fontFamily: "var(--font-mono)",
           fontSize: 11,
           color: "var(--fg-4)",
+          overflowWrap: "anywhere",
         }}
       >
         {childName} · {format(rangeStart)} – {format(rangeEnd)} · Generated {generatedAt}
@@ -155,14 +156,12 @@ function PreVisitBanner({ itemCount }: { itemCount: number }) {
 function SectionStat({
   value,
   direction,
-  badge,
 }: {
   value: string;
-  direction: "up" | "flag";
-  badge: string;
+  direction: "positive" | "flag";
 }) {
-  const dirStyles: Record<"up" | "flag", React.CSSProperties> = {
-    up: {
+  const dirStyles: Record<"positive" | "flag", React.CSSProperties> = {
+    positive: {
       background: "var(--color-success-bg)",
       color: "var(--color-success-fg)",
     },
@@ -171,6 +170,8 @@ function SectionStat({
       color: "var(--color-warning-fg)",
     },
   };
+  // Status is never color-alone: pair each direction with a label.
+  const badge = direction === "positive" ? "on track" : "review";
 
   return (
     <div
@@ -209,17 +210,9 @@ function SectionRow({
 }: {
   section: Report["sections"][number];
 }) {
-  // Heuristically assign a stat and direction from section data
-  // The real stat lives in the section body text; we extract first number if present
-  const numMatch = section.body.match(/(\d+(?:\.\d+)?)\s*%?/);
-  const stat = numMatch ? numMatch[0].trim() : "—";
-  const direction: "up" | "flag" =
-    section.title.toLowerCase().includes("pattern") ||
-    section.title.toLowerCase().includes("trigger") ||
-    section.title.toLowerCase().includes("flag")
-      ? "flag"
-      : "up";
-  const badge = direction === "up" ? "▲" : "flag";
+  // Use the typed stat the generator computed from this section's data.
+  // No regex-scraping of prose — only render a stat when one was derived.
+  const stat = section.stat;
 
   return (
     <div
@@ -250,11 +243,11 @@ function SectionRow({
       >
         <p
           className="text-sm text-fg-2"
-          style={{ margin: 0, lineHeight: 1.5, whiteSpace: "pre-line" }}
+          style={{ margin: 0, lineHeight: 1.5, whiteSpace: "pre-line", minWidth: 0, overflowWrap: "anywhere" }}
         >
           {section.body}
         </p>
-        <SectionStat value={stat} direction={direction} badge={badge} />
+        {stat ? <SectionStat value={stat.value} direction={stat.direction} /> : null}
       </div>
     </div>
   );
@@ -371,8 +364,8 @@ export default function ReportPage() {
             {/* Pre-visit AI summary banner */}
             <PreVisitBanner itemCount={report.sections.length} />
 
-            {/* Highlight stats */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Highlight stats — two-up on phones, four-up once there's room. */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <Highlight value={`${report.highlights.adherenceRate}%`} label="Adherence" />
               <Highlight value={`${report.highlights.daysCovered}`} label="Days covered" />
               <Highlight value={`${report.highlights.eventsLogged}`} label="Events logged" />
@@ -418,8 +411,8 @@ export default function ReportPage() {
 
 function Highlight({ value, label }: { value: string; label: string }) {
   return (
-    <div>
-      <p className="metric">{value}</p>
+    <div className="min-w-0">
+      <p className="metric truncate">{value}</p>
       <p className="text-xs text-fg-3 mt-1">{label}</p>
     </div>
   );

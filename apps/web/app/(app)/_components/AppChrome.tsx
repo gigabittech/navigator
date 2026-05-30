@@ -318,12 +318,18 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
           <SyncDot state={syncState} showLabel />
         </header>
 
-        {/* Page content */}
+        {/* Page content. The outer <main> spans the column and handles
+            horizontal padding; an inner wrapper caps the readable width so
+            content never stretches uncomfortably wide on tablet, desktop, or
+            big screens. The cap engages from md up, which also closes the
+            old 768–1023px "no sidebar, no cap" dead zone. */}
         <main
-          className="flex-1 px-5 py-6 max-w-app md:max-w-none lg:px-7 mx-auto w-full"
+          className="flex-1 w-full px-5 py-6 sm:px-6 lg:px-8 xl:px-10"
           style={{ paddingBottom: "calc(var(--safe-bottom) + 1.5rem)" }}
         >
-          {children}
+          <div className="mx-auto w-full max-w-app md:max-w-2xl lg:max-w-3xl 2xl:max-w-4xl">
+            {children}
+          </div>
         </main>
 
         {/* Mobile tab bar — hidden on desktop */}

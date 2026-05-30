@@ -9,8 +9,7 @@
 
 "use client";
 
-import { PGlite } from "@electric-sql/pglite";
-import { live, type PGliteWithLive } from "@electric-sql/pglite/live";
+import type { PGliteWithLive } from "@electric-sql/pglite/live";
 // Raw schema string — see next.config.mjs (asset/source) + types/sql.d.ts.
 import localSchema from "../../../../db/client-migrations/0001_local.sql";
 import { seedIfEmpty } from "./seed.js";
@@ -43,6 +42,16 @@ export function getDb(): Promise<PGliteWithLive> {
 }
 
 async function initDb(): Promise<PGliteWithLive> {
+  // Dynamic import keeps PGlite's WASM glue (~390 KB of JS) out of the route's
+  // First Load JS. It only loads once the DB actually boots, after hydration —
+  // there's no network on the critical path, and nothing renders against the
+  // DB until getDb() resolves anyway. The WASM binary itself is already an
+  // async asset (next.config sets asyncWebAssembly).
+  const [{ PGlite }, { live }] = await Promise.all([
+    import("@electric-sql/pglite"),
+    import("@electric-sql/pglite/live"),
+  ]);
+
   const db = await PGlite.create({
     dataDir: "idb://navigator",
     extensions: { live },

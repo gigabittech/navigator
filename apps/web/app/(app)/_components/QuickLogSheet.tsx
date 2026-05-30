@@ -15,10 +15,10 @@ export function FAB({ onOpen }: FABProps) {
       type="button"
       aria-label="Log something quickly"
       onClick={onOpen}
-      className="fixed z-40 flex items-center justify-center rounded-full text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-transform duration-fast ease-standard active:scale-95"
+      /* Sits above the mobile tab bar (92px up). On lg+ there's no tab bar,
+         so it drops to a comfortable corner offset. */
+      className="fixed z-40 flex items-center justify-center rounded-full text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-transform duration-fast ease-standard active:scale-95 right-5 lg:right-8 bottom-[calc(var(--safe-bottom)+92px)] lg:bottom-8"
       style={{
-        right: 20,
-        bottom: "calc(var(--safe-bottom) + 92px)",
         width: 56,
         height: 56,
         background: "var(--cta-success)",
@@ -118,37 +118,40 @@ export function QuickLogSheet({
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop. On phones it's a plain overlay behind the bottom sheet; on
+          lg+ it also centers the dialog within the viewport. */}
       <div
         role="presentation"
-        className="fixed inset-0 z-50 bg-surface-overlay"
+        className="fixed inset-0 z-50 bg-surface-overlay lg:grid lg:place-items-center lg:p-6"
         onClick={onClose}
-      />
-
-      {/* Sheet */}
-      <div
-        ref={sheetRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Log something quickly"
-        className="fixed left-0 right-0 bottom-0 z-50 bg-surface-card"
-        style={{
-          borderRadius: "24px 24px 0 0",
-          padding: "12px 20px calc(var(--safe-bottom) + 32px)",
-          boxShadow: "var(--shadow-sheet)",
-        }}
       >
-        {/* Grabber */}
+        {/* Sheet — a phone-style bottom sheet on mobile, a centered modal
+            dialog on lg+. Stop propagation so clicks inside don't close it
+            via the backdrop handler. */}
         <div
-          aria-hidden
-          className="mx-auto mb-5"
+          ref={sheetRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log something quickly"
+          onClick={(e) => e.stopPropagation()}
+          className="fixed left-0 right-0 bottom-0 z-50 bg-surface-card
+                     rounded-t-[24px] lg:static lg:w-full lg:max-w-md lg:rounded-3xl"
           style={{
-            width: 40,
-            height: 4,
-            borderRadius: 9999,
-            background: "var(--surface-grabber)",
+            padding: "12px 20px calc(var(--safe-bottom) + 32px)",
+            boxShadow: "var(--shadow-sheet)",
           }}
-        />
+        >
+          {/* Grabber — a touch affordance, hidden on the desktop modal. */}
+          <div
+            aria-hidden
+            className="mx-auto mb-5 lg:hidden"
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 9999,
+              background: "var(--surface-grabber)",
+            }}
+          />
 
         <h2 className="text-lg font-bold tracking-snug text-fg-1 mb-1">
           Log something quickly
@@ -207,6 +210,7 @@ export function QuickLogSheet({
             className="shrink-0 text-success-fg"
           />
           <span>Saves instantly to this device. Sync runs in the background.</span>
+        </div>
         </div>
       </div>
     </>

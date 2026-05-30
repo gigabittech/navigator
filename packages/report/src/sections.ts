@@ -32,10 +32,17 @@ export function adherenceSection(
         .join("\n")
     : "No medications tracked in this window.";
 
+  const totalTaken = rows.reduce((sum, r) => sum + r.taken, 0);
+  const totalDoses = rows.reduce((sum, r) => sum + r.total, 0);
+  const overallRate = totalDoses ? Math.round((totalTaken / totalDoses) * 100) : 0;
+
   return {
     id: "adherence",
     title: "Medication adherence",
     body,
+    stat: totalDoses
+      ? { value: `${overallRate}%`, direction: overallRate >= 80 ? "positive" : "flag" }
+      : undefined,
     data: { rows },
   };
 }
@@ -56,10 +63,15 @@ export function timelineHighlightsSection(events: LogEvent[]): ReportSection {
     .filter(Boolean)
     .join(" ");
 
+  const flagged = missed + refused;
+
   return {
     id: "timeline_highlights",
     title: "Timeline highlights",
     body,
+    stat: flagged
+      ? { value: `${flagged}`, direction: "flag" }
+      : { value: `${events.length}`, direction: "positive" },
     data: { missed, refused, corrected, voice },
   };
 }
@@ -80,10 +92,15 @@ export function behaviorTagsSection(events: LogEvent[]): ReportSection {
     ? `Most-observed tags: ${sorted.map(([t, n]) => `${t} (${n})`).join(", ")}.`
     : "No behavioral observations in this window.";
 
+  const [topTag, topCount] = sorted[0] ?? [];
+
   return {
     id: "behavior_tags",
     title: "Behavioral patterns",
     body,
+    stat: topTag
+      ? { value: `${topTag} · ${topCount}`, direction: "flag" }
+      : undefined,
     data: { tags: sorted },
   };
 }

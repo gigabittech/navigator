@@ -11,12 +11,15 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
         style={{
           minHeight: "100dvh",
           background: "var(--surface-onboarding)",
-          display: "flex",
-          flexDirection: "column",
           fontFamily: "var(--font-sans)",
         }}
+        className="flex flex-col items-center"
       >
-        {children}
+        {/* Centered, capped column so the 5-step flow stays a comfortable
+            reading width instead of full-bleed on tablet and desktop. */}
+        <div className="flex w-full max-w-app md:max-w-xl flex-1 flex-col">
+          {children}
+        </div>
       </div>
     </DbProvider>
   );

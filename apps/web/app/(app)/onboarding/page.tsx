@@ -23,6 +23,13 @@ export default function WelcomePage() {
   }
 
   function handleSkip() {
+    // Choosing to set up later is still a deliberate exit from the first-run
+    // gate. Mark the same `navigator.onboarded` flag the full flow sets so the
+    // app-shell guard doesn't route the user straight back here. The seeded
+    // child keeps /today usable until they finish setup in Settings.
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("navigator.onboarded", "true");
+    }
     router.push("/today");
   }
 
