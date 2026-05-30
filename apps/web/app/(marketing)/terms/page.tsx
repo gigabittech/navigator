@@ -259,7 +259,7 @@ export default function TermsPage() {
         <div className="container">
           <div className="footer-bottom" style={{ paddingTop: 0 }}>
             <div className="legal">
-              © 2026 Navigator · made by Gigabit. Navigator does not diagnose, prescribe, or treat.
+              © 2026 Navigator · made by NovaSapien Labs. Navigator does not diagnose, prescribe, or treat.
               For clinical decisions, always consult your child&rsquo;s provider.
             </div>
             <div style={{ display: "flex", gap: 16, fontSize: "var(--text-xs)", color: "var(--fg-on-dark-3)" }}>

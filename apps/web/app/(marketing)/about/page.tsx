@@ -351,7 +351,7 @@ export default function AboutPage() {
           </div>
           <div className="footer-bottom">
             <div className="legal">
-              © 2026 Navigator · made by Gigabit. Navigator does not diagnose, prescribe, or treat.
+              © 2026 Navigator · made by NovaSapien Labs. Navigator does not diagnose, prescribe, or treat.
               For clinical decisions, always consult your child&rsquo;s provider.
             </div>
           </div>
