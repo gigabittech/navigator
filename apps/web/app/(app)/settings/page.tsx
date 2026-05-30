@@ -78,17 +78,18 @@ export default function SettingsPage() {
           meds.map((m) => (
             <Card key={m.id} alt elevation="flat" className="p-4">
               <div className="flex items-center justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium text-fg-1">
                     {m.name} <span className="text-fg-3">· {formatDose(m.doseMg)} mg</span>
                   </p>
-                  <p className="text-xs text-fg-3 mt-1 font-mono">
+                  <p className="text-xs text-fg-3 mt-1 font-mono break-words">
                     {m.scheduledTimes.join(" · ")}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="shrink-0"
                   onClick={() => stopMedication(db, m.id)}
                 >
                   Stop

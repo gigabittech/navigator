@@ -13,6 +13,19 @@ import type { Config } from "tailwindcss";
 const preset: Partial<Config> = {
   content: [],
   theme: {
+    // Canonical breakpoint scale. Codifies stock Tailwind steps and adds an
+    // `xs` (~400px small phones) and a `3xl` big-screen step so app
+    // components have an explicit large-viewport target. Set at the top level
+    // (not under `extend`) so the breakpoint contract is fully owned here.
+    screens: {
+      xs: "400px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+      "3xl": "1920px",
+    },
     extend: {
       colors: {
         // Surfaces
@@ -180,6 +193,7 @@ const preset: Partial<Config> = {
         app: "var(--layout-app-max)",
         marketing: "var(--layout-marketing-max)",
         "web-content": "var(--layout-web-content-max)",
+        reading: "var(--reading-max)",
       },
       minHeight: {
         tap: "var(--tap-target-min)",

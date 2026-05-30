@@ -1,6 +1,7 @@
 import "./marketing.css";
 import Link from "next/link";
 import { WaitlistForm } from "./waitlist/_components/WaitlistForm";
+import { MobileNav } from "./_components/MobileNav";
 
 /* ── Inline SVG icons (Lucide subset matching the design) ── */
 function Icon({ name, size = 20, strokeWidth = 2, className = "" }: { name: string; size?: number; strokeWidth?: number; className?: string }) {
@@ -65,6 +66,7 @@ function Nav() {
         <a href="#waitlist" className="btn btn-primary">
           Join the waitlist <Icon name="arrow-right" size={16} />
         </a>
+        <MobileNav />
       </div>
     </header>
   );

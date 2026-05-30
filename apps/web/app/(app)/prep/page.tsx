@@ -310,7 +310,7 @@ function AddAppointmentForm({ onSaved }: { onSaved: () => void }) {
             className="w-full rounded-xl border border-border-card bg-surface-input px-3.5 py-2.5 text-sm text-fg-1 placeholder:text-fg-4 focus:outline-none focus-within:border-border-accent disabled:opacity-50"
           />
         </div>
-        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-fg-3 mb-1 block" htmlFor="appt-date">
               Date
@@ -691,7 +691,7 @@ export default function PrepPage() {
       {/* Adherence stats */}
       <Card>
         <p className="eyebrow mb-3">Last {PREP_WINDOW_DAYS} days · overview</p>
-        <div className="grid grid-cols-3 gap-2 min-[380px]:gap-3">
+        <div className="grid grid-cols-2 xs:grid-cols-3 gap-2 xs:gap-3">
           <Stat value={`${summary.adherence}%`} label="Adherence" />
           <Stat value={`${summary.missed}`} label="Missed" />
           <Stat value={`${summary.refused}`} label="Refused" />

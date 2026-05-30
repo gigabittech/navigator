@@ -82,15 +82,16 @@ function WearOffChart({ buckets }: WearOffChartProps) {
         <Pill tone="warning">Emerging</Pill>
       </div>
 
-      {/* Bar chart */}
+      {/* Bar chart — height grows fluidly with viewport; gap tightens on
+          narrow screens so seven columns stay legible at 320px. */}
       <div
         role="img"
         aria-label="Hourly irritability bar chart"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(7, 1fr)",
-          gap: 6,
-          height: 100,
+          gap: "clamp(3px, 1.2vw, 10px)",
+          height: "clamp(100px, 22vw, 220px)",
           alignItems: "end",
           marginBottom: 8,
         }}
@@ -125,14 +126,15 @@ function WearOffChart({ buckets }: WearOffChartProps) {
         })}
       </div>
 
-      {/* Axis labels */}
+      {/* Axis labels — gap mirrors the bars; fluid font keeps the seven
+          hour labels readable at 320px without clipping. */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(7, 1fr)",
-          gap: 6,
+          gap: "clamp(3px, 1.2vw, 10px)",
           fontFamily: "var(--font-mono)",
-          fontSize: 10,
+          fontSize: "clamp(9px, 0.5rem + 0.3vw, 12px)",
           color: "var(--fg-3)",
           textAlign: "center",
         }}
@@ -194,11 +196,12 @@ function AdherenceChart({ weeks, pct }: AdherenceChartProps) {
         <Pill tone="success">{pct}</Pill>
       </div>
 
-      {/* SVG line chart */}
+      {/* SVG line chart — viewBox coordinates are fixed; only the rendered
+          height scales, growing taller on larger screens. */}
       <svg
         viewBox="0 0 280 110"
         preserveAspectRatio="none"
-        style={{ width: "100%", height: 110, overflow: "visible" }}
+        style={{ width: "100%", height: "clamp(110px, 24vw, 240px)", overflow: "visible" }}
         role="img"
         aria-label={`Adherence trend line chart — ${pct} overall`}
       >
@@ -254,7 +257,7 @@ function TriggerClustersChart({ triggers }: TriggerClustersChartProps) {
         <div
           role="list"
           aria-label="Top trigger tags"
-          style={{ display: "grid", gap: 10 }}
+          style={{ display: "grid", gap: "clamp(10px, 1.5vw, 18px)" }}
         >
           {triggers.map(({ name, count, pct }, idx) => {
             // First two entries show as warning (amber), rest as success (green).
@@ -279,7 +282,7 @@ function TriggerClustersChart({ triggers }: TriggerClustersChartProps) {
                   </div>
                   <div
                     style={{
-                      height: 6,
+                      height: "clamp(6px, 0.8vw, 12px)",
                       background: "var(--border-subtle)",
                       borderRadius: 3,
                       overflow: "hidden",

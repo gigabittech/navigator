@@ -141,18 +141,23 @@
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo,
                Consolas, monospace;
 
+  /* Small/body steps stay fixed for vertical rhythm. */
   --text-2xs: 11px;
   --text-xs:  12px;
   --text-sm:  13px;
   --text-base:15px;
   --text-md:  16px;
-  --text-lg:  18px;
-  --text-xl:  20px;
-  --text-2xl: 24px;
-  --text-3xl: 28px;
-  --text-4xl: 34px;
-  --text-5xl: 44px;
-  --text-6xl: 56px;
+  /* Larger steps scale fluidly: clamp(mobile-min, vw-preferred, desktop-max).
+     Min ≈ a sensible mobile size; max ≈ the previous fixed value so nothing
+     shrinks on desktop. These feed the tailwind-preset fontSize map, so app
+     headings (text-lg … text-6xl) inherit fluid sizing automatically. */
+  --text-lg:  clamp(17px, 1.0rem + 0.20vw, 18px);
+  --text-xl:  clamp(18px, 1.05rem + 0.45vw, 20px);
+  --text-2xl: clamp(21px, 1.20rem + 0.80vw, 24px);
+  --text-3xl: clamp(24px, 1.35rem + 1.10vw, 28px);
+  --text-4xl: clamp(28px, 1.55rem + 1.80vw, 34px);
+  --text-5xl: clamp(33px, 1.85rem + 3.00vw, 44px);
+  --text-6xl: clamp(40px, 2.20rem + 4.40vw, 56px);
 
   --weight-regular: 400;
   --weight-medium:  500;
@@ -208,9 +213,14 @@
   --layout-marketing-max: 1200px;
   --layout-web-sidebar:   260px;
   --layout-web-content-max: 1400px;
+  /* Comfortable measure for long-form prose (clinical notes, report body).
+     ~70ch keeps lines in the 45–75ch readability sweet spot. */
+  --reading-max: 70ch;
   --tap-target-min: 44px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 /* ============================================================

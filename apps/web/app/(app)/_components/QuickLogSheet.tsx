@@ -16,8 +16,10 @@ export function FAB({ onOpen }: FABProps) {
       aria-label="Log something quickly"
       onClick={onOpen}
       /* Sits above the mobile tab bar (92px up). On lg+ there's no tab bar,
-         so it drops to a comfortable corner offset. */
-      className="fixed z-40 flex items-center justify-center rounded-full text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-transform duration-fast ease-standard active:scale-95 right-5 lg:right-8 bottom-[calc(var(--safe-bottom)+92px)] lg:bottom-8"
+         so it drops to a comfortable corner offset. Right/bottom offsets add
+         the safe-area insets so the FAB clears the notch/home rail in
+         landscape (viewportFit:cover); the base offsets stay the floor. */
+      className="fixed z-40 flex items-center justify-center rounded-full text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-transform duration-fast ease-standard active:scale-95 right-[calc(var(--safe-right)+1.25rem)] lg:right-[calc(var(--safe-right)+2rem)] bottom-[calc(var(--safe-bottom)+92px)] lg:bottom-[calc(var(--safe-bottom)+2rem)]"
       style={{
         width: 56,
         height: 56,

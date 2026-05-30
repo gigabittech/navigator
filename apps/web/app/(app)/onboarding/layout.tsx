@@ -16,8 +16,13 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
         className="flex flex-col items-center"
       >
         {/* Centered, capped column so the 5-step flow stays a comfortable
-            reading width instead of full-bleed on tablet and desktop. */}
-        <div className="flex w-full max-w-app md:max-w-xl flex-1 flex-col">
+            reading width instead of full-bleed on tablet and desktop. A
+            layout-level horizontal gutter (plus safe-area insets) guarantees
+            every step keeps clear of the viewport edge, regardless of its own
+            padding. */}
+        <div
+          className="flex w-full max-w-app md:max-w-xl flex-1 flex-col [padding-left:calc(1.25rem+var(--safe-left))] [padding-right:calc(1.25rem+var(--safe-right))] sm:[padding-left:calc(1.5rem+var(--safe-left))] sm:[padding-right:calc(1.5rem+var(--safe-right))]"
+        >
           {children}
         </div>
       </div>

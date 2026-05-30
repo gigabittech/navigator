@@ -319,15 +319,22 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content. The outer <main> spans the column and handles
-            horizontal padding; an inner wrapper caps the readable width so
-            content never stretches uncomfortably wide on tablet, desktop, or
-            big screens. The cap engages from md up, which also closes the
-            old 768–1023px "no sidebar, no cap" dead zone. */}
+            horizontal padding; an inner wrapper caps the readable width to an
+            intentional measure (max-w-reading, 70ch) so content never
+            stretches uncomfortably wide on tablet, desktop, or big screens.
+            The horizontal padding keeps its responsive visual floor (5→10)
+            and additionally respects the safe-area insets so content doesn't
+            clip under the notch/home rail in landscape (viewportFit:cover).
+            Each breakpoint floor is expressed as max(<floor>, safe-inset). */}
         <main
-          className="flex-1 w-full px-5 py-6 sm:px-6 lg:px-8 xl:px-10"
+          className="flex-1 w-full py-6
+                     pl-[max(var(--safe-left),1.25rem)] pr-[max(var(--safe-right),1.25rem)]
+                     sm:pl-[max(var(--safe-left),1.5rem)] sm:pr-[max(var(--safe-right),1.5rem)]
+                     lg:pl-[max(var(--safe-left),2rem)] lg:pr-[max(var(--safe-right),2rem)]
+                     xl:pl-[max(var(--safe-left),2.5rem)] xl:pr-[max(var(--safe-right),2.5rem)]"
           style={{ paddingBottom: "calc(var(--safe-bottom) + 1.5rem)" }}
         >
-          <div className="mx-auto w-full max-w-app md:max-w-2xl lg:max-w-3xl 2xl:max-w-4xl">
+          <div className="mx-auto w-full max-w-reading">
             {children}
           </div>
         </main>
