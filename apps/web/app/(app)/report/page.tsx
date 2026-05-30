@@ -54,7 +54,7 @@ function ReportHeader({
       style={{
         textAlign: "center",
         padding: "20px 16px 14px",
-        borderBottom: "1px solid rgba(14, 27, 48, 0.06)",
+        borderBottom: "1px solid var(--border-subtle)",
         marginBottom: 16,
       }}
     >
@@ -65,7 +65,7 @@ function ReportHeader({
           gap: 8,
           fontSize: 11,
           fontWeight: 700,
-          color: "var(--emerald-600)",
+          color: "var(--color-success-fg)",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           marginBottom: 8,
@@ -76,8 +76,8 @@ function ReportHeader({
             width: 22,
             height: 22,
             borderRadius: 6,
-            background: "var(--emerald-600)",
-            color: "white",
+            background: "var(--cta-success)",
+            color: "var(--fg-on-accent)",
             display: "grid",
             placeItems: "center",
             fontSize: 12,
@@ -97,7 +97,7 @@ function ReportHeader({
           color: "var(--fg-1)",
         }}
       >
-        90-Day Summary
+        90-day summary
       </h2>
       <div
         style={{
@@ -129,8 +129,8 @@ function PreVisitBanner({ itemCount }: { itemCount: number }) {
     <div
       style={{
         padding: "10px 14px",
-        background: "linear-gradient(135deg, rgba(201, 168, 76, 0.10), rgba(15, 110, 86, 0.06))",
-        border: "1px solid rgba(201, 168, 76, 0.18)",
+        background: "var(--gradient-report-banner)",
+        border: "1px solid var(--accent-gold-bd)",
         borderRadius: 12,
         fontSize: 12.5,
         color: "var(--fg-2)",
@@ -140,7 +140,7 @@ function PreVisitBanner({ itemCount }: { itemCount: number }) {
         gap: 10,
       }}
     >
-      <span style={{ color: "#C9A84C", flexShrink: 0 }}>
+      <span style={{ color: "var(--accent-gold-600)", flexShrink: 0 }}>
         <SparklesIcon />
       </span>
       <span>
@@ -163,12 +163,12 @@ function SectionStat({
 }) {
   const dirStyles: Record<"up" | "flag", React.CSSProperties> = {
     up: {
-      background: "rgba(15, 110, 86, 0.10)",
-      color: "var(--emerald-700)",
+      background: "var(--color-success-bg)",
+      color: "var(--color-success-fg)",
     },
     flag: {
-      background: "rgba(245, 158, 11, 0.14)",
-      color: "var(--amber-600)",
+      background: "var(--color-warning-bg)",
+      color: "var(--color-warning-fg)",
     },
   };
 
@@ -225,7 +225,7 @@ function SectionRow({
     <div
       style={{
         padding: "14px 0",
-        borderBottom: "1px solid rgba(14, 27, 48, 0.05)",
+        borderBottom: "1px solid var(--border-subtle)",
       }}
     >
       <div

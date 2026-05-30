@@ -139,7 +139,7 @@ export function DoseCard({ slot }: { slot: DoseSlot }) {
 
       {/* Undo affordance — visible for 10 s after a fresh log */}
       {undoVisible && lastLoggedEventId ? (
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex items-center gap-2 mt-3" role="status" aria-live="polite">
           <span className="text-xs text-fg-3">Logged.</span>
           <button
             type="button"
@@ -155,7 +155,11 @@ export function DoseCard({ slot }: { slot: DoseSlot }) {
         </p>
       ) : null}
 
-      {error ? <p className="text-xs text-danger-fg mt-3">{error}</p> : null}
+      {error ? (
+        <p className="text-xs text-danger-fg mt-3" role="alert">
+          {error}
+        </p>
+      ) : null}
     </Card>
   );
 }

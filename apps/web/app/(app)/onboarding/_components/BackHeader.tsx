@@ -13,8 +13,8 @@ export function BackHeader({ title }: { title: string }) {
         alignItems: "center",
         gap: 8,
         padding: "12px 20px",
-        borderBottom: "1px solid rgba(14, 27, 48, 0.05)",
-        background: "var(--cream-100)",
+        borderBottom: "1px solid var(--border-onboarding-subtle)",
+        background: "var(--surface-onboarding)",
       }}
     >
       <button
@@ -25,9 +25,9 @@ export function BackHeader({ title }: { title: string }) {
           width: 36,
           height: 36,
           borderRadius: 10,
-          background: "rgba(14, 27, 48, 0.04)",
+          background: "var(--surface-onboarding-sunk)",
           border: "none",
-          color: "var(--navy-600)",
+          color: "var(--fg-onboarding-muted)",
           display: "grid",
           placeItems: "center",
           cursor: "pointer",
@@ -42,7 +42,7 @@ export function BackHeader({ title }: { title: string }) {
         style={{
           fontSize: 15,
           fontWeight: 700,
-          color: "var(--navy-800)",
+          color: "var(--fg-onboarding-title)",
         }}
       >
         {title}

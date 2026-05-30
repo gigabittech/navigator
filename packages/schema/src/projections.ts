@@ -24,44 +24,65 @@ export interface DoseStatusSnapshot {
 
 /**
  * Reduce all medication events for a window into per-(medication, slot)
- * status snapshots. Apply `DoseCorrected` events last so they override
- * whichever status came first.
+ * status snapshots.
+ *
+ * Two passes, so the result does not depend on whether a `DoseCorrected`
+ * event sorts before or after the event it corrects. (Corrections are now
+ * stamped with the *original* event's `occurred_at` for stable timeline
+ * placement — see `correctDoseEvent` — which means a correction and its
+ * target can share an `occurred_at` and arrive in either order.)
+ *
+ *  1. Build the base snapshot per (medication, slot) from status-setting
+ *     events — last one wins.
+ *  2. Apply corrections, keyed by the event id they target — last correction
+ *     wins. A correction that targets an unknown event id is a no-op.
  */
 export function projectDoseStatus(events: LogEvent[]): DoseStatusSnapshot[] {
   const bySlot = new Map<string, DoseStatusSnapshot>();
+  // Index of the base event id that currently owns each slot, so a later
+  // correction can locate its target regardless of array order.
+  const slotByEventId = new Map<string, string>();
 
+  // ── Pass 1: status-setting events ───────────────────────────────────────
   for (const event of events) {
+    if (event.eventType === EventType.Corrected) continue;
+
     const payload = event.payload as Record<string, unknown>;
     const medId = payload["medication_id"] as string | undefined;
     const scheduledFor = payload["scheduled_for"] as string | undefined;
-
-    if (event.eventType === EventType.Corrected) {
-      const correction = payload as unknown as DoseCorrectedPayload;
-      const target = [...bySlot.values()].find(
-        (s) => s.sourceEventId === correction.corrects_event_id,
-      );
-      if (target) {
-        target.status = correction.new_status;
-        target.corrected = true;
-        target.sourceEventId = event.id;
-      }
-      continue;
-    }
-
     if (!medId || !scheduledFor) continue;
-    const key = `${medId}|${scheduledFor}`;
 
     const status = mapEventTypeToStatus(event.eventType);
     if (!status) continue;
 
+    const key = `${medId}|${scheduledFor}`;
     bySlot.set(key, {
       medicationId: medId,
       scheduledFor,
       status,
       minutesOffset: payload["minutes_offset"] as number | undefined,
       sourceEventId: event.id,
-      corrected: bySlot.get(key)?.corrected ?? false,
+      corrected: false,
     });
+    slotByEventId.set(event.id, key);
+  }
+
+  // ── Pass 2: corrections (last correction per target wins) ────────────────
+  for (const event of events) {
+    if (event.eventType !== EventType.Corrected) continue;
+
+    const correction = event.payload as unknown as DoseCorrectedPayload;
+    const slotKey = slotByEventId.get(correction.corrects_event_id);
+    if (!slotKey) continue; // orphan correction — no target.
+
+    const target = bySlot.get(slotKey);
+    if (!target) continue;
+
+    target.status = correction.new_status;
+    target.corrected = true;
+    target.sourceEventId = event.id;
+    // Allow a subsequent correction to chain onto this one.
+    slotByEventId.set(event.id, slotKey);
   }
 
   return [...bySlot.values()];

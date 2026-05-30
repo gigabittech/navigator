@@ -121,6 +121,17 @@
   --sky-500: #0EA5E9;
   --sky-600: #0284C7;
 
+  /* — Gold (brand warmth accent — used on dark surfaces & report seals) — */
+  --gold-400: #D6BC78;
+  --gold-500: #C9A84C;
+  --gold-600: #B8860B;
+  --gold-700: #97700C;
+
+  /* — Ink (deep navy used for dark chrome surfaces) — */
+  --ink-700: #1A3050;
+  --ink-800: #0E1B30;
+  --ink-900: #060D1A;
+
   /* ============================================================
      TYPOGRAPHY — theme-agnostic
      Inter for everything; JetBrains Mono for data only.
@@ -271,6 +282,77 @@
   --shadow-xl: 0 24px 64px -16px rgba(15, 23, 42, 0.18);
   --shadow-glow-accent:  0 0 0 4px rgba(99, 102, 241, 0.20);
   --shadow-glow-success: 0 0 0 4px rgba(16, 185, 129, 0.20);
+
+  /* ----------------------------------------------------------------
+     Dark chrome surfaces — used by the desktop sidebar and other
+     always-dark panels that don't flip with the light/dark theme.
+     ---------------------------------------------------------------- */
+  --surface-sidebar:        var(--ink-800);
+  --surface-sidebar-raised: rgba(252, 251, 246, 0.06);
+  --border-on-dark:         rgba(252, 251, 246, 0.10);
+  --border-on-dark-subtle:  rgba(252, 251, 246, 0.06);
+  --fg-on-dark:        #F9F8F4;
+  --fg-on-dark-muted:  rgba(252, 251, 246, 0.72);
+  --fg-on-dark-faint:  rgba(252, 251, 246, 0.50);
+  --fg-on-dark-ghost:  rgba(252, 251, 246, 0.42);
+  --surface-on-dark-active: rgba(5, 150, 105, 0.20);
+  --surface-on-dark-hover:  rgba(252, 251, 246, 0.04);
+
+  /* ----------------------------------------------------------------
+     Gold accent — brand warmth on dark hero/report surfaces.
+     ---------------------------------------------------------------- */
+  --accent-gold-500: var(--gold-500);
+  --accent-gold-600: var(--gold-600);
+  --accent-gold-700: var(--gold-700);
+  --accent-gold-on-dark: var(--gold-500);
+
+  /* Brand-mark gradient (the Navigator glyph / avatars) */
+  --gradient-brand-glyph: linear-gradient(150deg, var(--emerald-500), var(--emerald-700));
+  --gradient-brand-glyph-135: linear-gradient(135deg, var(--emerald-500), var(--emerald-700));
+  --accent-gold-bg:  rgba(201, 168, 76, 0.16);
+  --accent-gold-bd:  rgba(201, 168, 76, 0.18);
+  --accent-gold-tint: rgba(201, 168, 76, 0.10);
+  --gradient-report-banner: linear-gradient(135deg, rgba(201, 168, 76, 0.10), rgba(15, 110, 86, 0.06));
+
+  /* ----------------------------------------------------------------
+     Onboarding surfaces — a calm cream + ink palette for the
+     installable first-run flow. Semantic so the flow renders with
+     colour on every route (not only under marketing.css).
+     ---------------------------------------------------------------- */
+  --surface-onboarding:       var(--warm-100);
+  --surface-onboarding-card:  #FFFFFF;
+  --fg-onboarding-title:      var(--ink-800);
+  --fg-onboarding-body:       #2A4A6E;
+  --fg-onboarding-muted:      #3D6080;
+  --border-onboarding:        rgba(14, 27, 48, 0.10);
+  --border-onboarding-subtle: rgba(14, 27, 48, 0.06);
+  --border-onboarding-strong: rgba(14, 27, 48, 0.16);
+  --surface-onboarding-sunk:  rgba(14, 27, 48, 0.05);
+
+  /* Onboarding emerald accent (matches the brand glyph gradient) */
+  --onboarding-accent:        var(--emerald-600);
+  --onboarding-accent-strong: var(--emerald-700);
+  --onboarding-accent-tint:   rgba(15, 110, 86, 0.10);
+  --onboarding-accent-tint-soft: rgba(15, 110, 86, 0.06);
+  --onboarding-accent-ring:   rgba(15, 110, 86, 0.10);
+  --onboarding-accent-shadow: 0 8px 20px -6px rgba(15, 110, 86, 0.40);
+
+  /* ----------------------------------------------------------------
+     Success-CTA accent — the green "primary action" buttons and
+     tints shared across Today / Prep / log sheets. Semantic so the
+     same emerald glow is defined once.
+     ---------------------------------------------------------------- */
+  --cta-success:        var(--emerald-600);
+  --cta-success-strong: var(--emerald-700);
+  --cta-success-tint:   rgba(15, 110, 86, 0.10);
+  --cta-success-tint-soft: rgba(15, 110, 86, 0.06);
+  --shadow-cta-success: 0 8px 20px -6px rgba(15, 110, 86, 0.40);
+  --cta-success-bd:     rgba(15, 110, 86, 0.18);
+  --gradient-pattern-card: linear-gradient(180deg, rgba(15, 110, 86, 0.06), var(--surface-card));
+  --shadow-cta-success-lg: 0 16px 36px -8px rgba(15, 110, 86, 0.50);
+  --shadow-cta-success-float: 0 12px 28px -6px rgba(15, 110, 86, 0.50), 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-sheet: 0 -20px 60px -10px rgba(14, 27, 48, 0.18);
+  --surface-grabber: rgba(14, 27, 48, 0.18);
 }
 
 /* ============================================================

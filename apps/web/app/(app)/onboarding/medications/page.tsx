@@ -95,7 +95,7 @@ export default function MedicationsPage() {
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--navy-400)",
+              color: "var(--fg-onboarding-muted)",
             }}
           >
             Step 2 of 4
@@ -108,7 +108,7 @@ export default function MedicationsPage() {
               lineHeight: 1.1,
               marginTop: 2,
               marginBottom: 0,
-              color: "var(--navy-800)",
+              color: "var(--fg-onboarding-title)",
             }}
           >
             What are they taking?
@@ -117,7 +117,7 @@ export default function MedicationsPage() {
             style={{
               marginTop: 8,
               fontSize: 14,
-              color: "var(--navy-500)",
+              color: "var(--fg-onboarding-body)",
               lineHeight: 1.5,
             }}
           >
@@ -132,12 +132,12 @@ export default function MedicationsPage() {
             gridTemplateColumns: "20px 1fr",
             gap: 10,
             alignItems: "center",
-            background: "white",
-            border: "1px solid rgba(14, 27, 48, 0.08)",
+            background: "var(--surface-onboarding-card)",
+            border: "1px solid var(--border-onboarding-subtle)",
             borderRadius: 12,
             padding: "12px 14px",
             marginBottom: 14,
-            color: "var(--navy-400)",
+            color: "var(--fg-onboarding-muted)",
           }}
         >
           <SearchIcon />
@@ -151,7 +151,7 @@ export default function MedicationsPage() {
               outline: "none",
               background: "transparent",
               fontSize: 15,
-              color: "var(--navy-800)",
+              color: "var(--fg-onboarding-title)",
               fontFamily: "inherit",
               width: "100%",
             }}
@@ -165,12 +165,12 @@ export default function MedicationsPage() {
             <li
               style={{
                 padding: "14px 14px",
-                background: "white",
-                border: "1px solid rgba(14, 27, 48, 0.06)",
+                background: "var(--surface-onboarding-card)",
+                border: "1px solid var(--border-onboarding-subtle)",
                 borderRadius: 12,
                 marginBottom: 8,
                 fontSize: 14,
-                color: "var(--navy-500)",
+                color: "var(--fg-onboarding-body)",
               }}
             >
               No medications match that search.
@@ -189,10 +189,12 @@ export default function MedicationsPage() {
                     gap: 12,
                     alignItems: "center",
                     padding: "14px",
-                    background: isSelected ? "rgba(15, 110, 86, 0.04)" : "white",
+                    background: isSelected
+                      ? "var(--onboarding-accent-tint-soft)"
+                      : "var(--surface-onboarding-card)",
                     border: isSelected
-                      ? "1px solid var(--emerald-600)"
-                      : "1px solid rgba(14, 27, 48, 0.06)",
+                      ? "1px solid var(--onboarding-accent)"
+                      : "1px solid var(--border-onboarding-subtle)",
                     borderRadius: 12,
                     marginBottom: 8,
                     width: "100%",
@@ -210,9 +212,11 @@ export default function MedicationsPage() {
                       height: 36,
                       borderRadius: 10,
                       background: isSelected
-                        ? "rgba(15, 110, 86, 0.10)"
-                        : "rgba(14, 27, 48, 0.05)",
-                      color: isSelected ? "var(--emerald-600)" : "var(--navy-500)",
+                        ? "var(--onboarding-accent-tint)"
+                        : "var(--surface-onboarding-sunk)",
+                      color: isSelected
+                        ? "var(--onboarding-accent)"
+                        : "var(--fg-onboarding-body)",
                       display: "grid",
                       placeItems: "center",
                       flexShrink: 0,
@@ -228,13 +232,13 @@ export default function MedicationsPage() {
                       style={{
                         fontSize: 14,
                         fontWeight: 600,
-                        color: "var(--navy-800)",
+                        color: "var(--fg-onboarding-title)",
                         lineHeight: 1.2,
                       }}
                     >
                       {med.name}
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--navy-400)", marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: "var(--fg-onboarding-muted)", marginTop: 2 }}>
                       {med.drugClass}
                     </div>
                   </div>
@@ -252,8 +256,8 @@ export default function MedicationsPage() {
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 4,
-                        background: "rgba(15, 110, 86, 0.10)",
-                        color: "var(--emerald-600)",
+                        background: "var(--onboarding-accent-tint)",
+                        color: "var(--onboarding-accent)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -273,10 +277,10 @@ export default function MedicationsPage() {
           style={{
             marginTop: 4,
             padding: "12px 14px",
-            background: "rgba(15, 110, 86, 0.06)",
+            background: "var(--onboarding-accent-tint-soft)",
             borderRadius: 12,
             fontSize: 12,
-            color: "var(--emerald-700)",
+            color: "var(--onboarding-accent-strong)",
             display: "flex",
             alignItems: "center",
             gap: 8,
@@ -296,14 +300,14 @@ export default function MedicationsPage() {
             gap: 8,
             width: "100%",
             padding: "16px 22px",
-            background: "var(--emerald-600)",
-            color: "white",
+            background: "var(--onboarding-accent)",
+            color: "var(--fg-on-dark)",
             border: "none",
             borderRadius: 14,
             fontSize: 15,
             fontWeight: 600,
             fontFamily: "inherit",
-            boxShadow: "0 8px 20px -6px rgba(15, 110, 86, 0.4)",
+            boxShadow: "var(--onboarding-accent-shadow)",
             cursor: "pointer",
             marginTop: 20,
             minHeight: 44,
@@ -368,7 +372,7 @@ function CheckIcon({ size = 14 }: { size?: number }) {
 
 function PlusIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden style={{ color: "var(--navy-400)" }}>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden style={{ color: "var(--fg-onboarding-muted)" }}>
       <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );

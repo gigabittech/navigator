@@ -12,6 +12,7 @@ import {
 import { usePGlite, useLiveQuery } from "@electric-sql/pglite-react";
 import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
 import { useTimeline } from "@/lib/db/queries/useTimeline";
+import { useChild } from "@/lib/db/queries/useChild";
 import { formatClock } from "@/lib/time";
 import { APPOINTMENT_COLUMNS } from "@/lib/db/sql";
 import type { AppointmentRow } from "@/lib/db/types";
@@ -49,8 +50,8 @@ function PrepBanner({ appointment }: { appointment: NonNullable<ReturnType<typeo
   return (
     <div
       style={{
-        background: "linear-gradient(135deg, #0E1B30, #1a3050)",
-        color: "#FCFBF6",
+        background: "linear-gradient(135deg, var(--ink-800), var(--ink-700))",
+        color: "var(--fg-on-dark)",
         borderRadius: 16,
         padding: "18px 20px",
         marginBottom: 16,
@@ -68,7 +69,7 @@ function PrepBanner({ appointment }: { appointment: NonNullable<ReturnType<typeo
           width: 140,
           height: 140,
           borderRadius: "50%",
-          background: "rgba(15, 110, 86, 0.25)",
+          background: "var(--surface-on-dark-active)",
           filter: "blur(20px)",
           pointerEvents: "none",
         }}
@@ -79,7 +80,7 @@ function PrepBanner({ appointment }: { appointment: NonNullable<ReturnType<typeo
           fontWeight: 700,
           letterSpacing: "0.10em",
           textTransform: "uppercase",
-          color: "#C9A84C",
+          color: "var(--accent-gold-on-dark)",
           marginBottom: 6,
         }}
       >
@@ -91,7 +92,7 @@ function PrepBanner({ appointment }: { appointment: NonNullable<ReturnType<typeo
           fontWeight: 700,
           letterSpacing: "-0.02em",
           margin: "0 0 4px",
-          color: "#FCFBF6",
+          color: "var(--fg-on-dark)",
         }}
       >
         {appointment.with ?? appointment.kind} · {dateLabel}
@@ -99,7 +100,7 @@ function PrepBanner({ appointment }: { appointment: NonNullable<ReturnType<typeo
       <p
         style={{
           fontSize: 13,
-          color: "rgba(252, 251, 246, 0.78)",
+          color: "var(--fg-on-dark-muted)",
           margin: 0,
         }}
       >
@@ -110,7 +111,7 @@ function PrepBanner({ appointment }: { appointment: NonNullable<ReturnType<typeo
           fontFamily: "var(--font-mono)",
           fontSize: 12,
           marginTop: 12,
-          color: "#C9A84C",
+          color: "var(--accent-gold-on-dark)",
         }}
       >
         {daysLabel} · {timeLabel} · in-person
@@ -136,12 +137,12 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
   return (
     <div
       style={{
-        background: "white",
-        border: "1px solid rgba(14, 27, 48, 0.06)",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-subtle)",
         borderRadius: 16,
         padding: "6px 0",
         marginBottom: 14,
-        boxShadow: "0 1px 2px rgba(14, 27, 48, 0.04)",
+        boxShadow: "var(--shadow-sm)",
       }}
     >
       {items.map((item) => {
@@ -159,7 +160,7 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
               padding: "12px 16px",
               background: "transparent",
               border: "none",
-              borderBottom: "1px solid rgba(14, 27, 48, 0.04)",
+              borderBottom: "1px solid var(--border-subtle)",
               width: "100%",
               textAlign: "left",
               cursor: "pointer",
@@ -171,9 +172,9 @@ function Checklist({ items }: { items: ChecklistItem[] }) {
                 width: 20,
                 height: 20,
                 borderRadius: 6,
-                border: done ? "none" : "1.5px solid rgba(14, 27, 48, 0.20)",
-                background: done ? "var(--emerald-600)" : "transparent",
-                color: "white",
+                border: done ? "none" : "1.5px solid var(--border-strong)",
+                background: done ? "var(--color-success-fg)" : "transparent",
+                color: "var(--fg-on-accent)",
                 display: "grid",
                 placeItems: "center",
                 marginTop: 2,
@@ -357,10 +358,10 @@ function AddAppointmentForm({ onSaved }: { onSaved: () => void }) {
             type="button"
             onClick={() => void save()}
             disabled={saving}
-            className="min-h-tap flex flex-1 items-center justify-center rounded-xl text-sm font-semibold text-white transition-opacity duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot disabled:opacity-50"
+            className="min-h-tap flex flex-1 items-center justify-center rounded-xl text-sm font-semibold text-fg-on-accent transition-opacity duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot disabled:opacity-50"
             style={{
-              background: "var(--emerald-600)",
-              boxShadow: "0 8px 20px -6px rgba(15,110,86,0.40)",
+              background: "var(--cta-success)",
+              boxShadow: "var(--shadow-cta-success)",
             }}
           >
             {saving ? "Saving…" : "Save appointment"}
@@ -445,11 +446,11 @@ function UpcomingAppointments() {
       ) : (
         <div
           style={{
-            background: "white",
-            border: "1px solid rgba(14, 27, 48, 0.06)",
+            background: "var(--surface-card)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: 16,
             padding: "6px 0",
-            boxShadow: "0 1px 2px rgba(14, 27, 48, 0.04)",
+            boxShadow: "var(--shadow-sm)",
             marginTop: showForm ? 8 : 0,
           }}
         >
@@ -471,7 +472,7 @@ function UpcomingAppointments() {
                   padding: "12px 16px",
                   borderBottom:
                     idx < appointments.length - 1
-                      ? "1px solid rgba(14, 27, 48, 0.04)"
+                      ? "1px solid var(--border-subtle)"
                       : "none",
                 }}
               >
@@ -506,8 +507,9 @@ function UpcomingAppointments() {
 /* ── PrepPage ── */
 
 export default function PrepPage() {
-  const appointment = useNextAppointment();
-  const events = useTimeline(400);
+  const child = useChild();
+  const appointment = useNextAppointment(child?.id);
+  const events = useTimeline(400, child?.id);
 
   const summary = useMemo(() => {
     const since = new Date();

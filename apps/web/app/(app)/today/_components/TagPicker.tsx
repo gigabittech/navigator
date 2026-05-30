@@ -162,7 +162,7 @@ export function TagPicker({ onClose }: TagPickerProps) {
             rows={3}
             placeholder="Anything else worth remembering?"
             disabled={saving}
-            className="w-full rounded-xl border border-border-card bg-surface-input px-4 py-3.5 text-base text-fg-1 placeholder:text-fg-4 leading-normal resize-none focus:outline-none focus-within:border-border-accent disabled:opacity-50"
+            className="w-full rounded-xl border border-border-card bg-surface-input px-4 py-3.5 text-base text-fg-1 placeholder:text-fg-4 leading-normal resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-accent focus-visible:border-border-accent disabled:opacity-50"
           />
         </div>
 
@@ -178,10 +178,10 @@ export function TagPicker({ onClose }: TagPickerProps) {
           type="button"
           onClick={() => void save()}
           disabled={saving}
-          className="w-full min-h-tap flex items-center justify-center rounded-xl text-sm font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-opacity duration-fast disabled:opacity-50 mb-6"
+          className="w-full min-h-tap flex items-center justify-center rounded-xl text-sm font-semibold text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-opacity duration-fast disabled:opacity-50 mb-6"
           style={{
-            background: "var(--emerald-600)",
-            boxShadow: "0 8px 20px -6px rgba(15,110,86,0.40)",
+            background: "var(--cta-success)",
+            boxShadow: "var(--shadow-cta-success)",
             padding: "16px 22px",
           }}
         >

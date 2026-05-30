@@ -4,12 +4,14 @@ import { useMemo } from "react";
 import { Card, Pill } from "@navigator/design-system/components";
 import { useTimeline } from "@/lib/db/queries/useTimeline";
 import { useMedications } from "@/lib/db/queries/useMedications";
+import { useChild } from "@/lib/db/queries/useChild";
 import { dayHeading, dayKey, relativeTime } from "@/lib/time";
 import { describeEvent } from "./_components/eventDisplay";
 import type { EventRow } from "@/lib/db/types";
 
 export default function TimelinePage() {
-  const events = useTimeline(300);
+  const child = useChild();
+  const events = useTimeline(300, child?.id);
   const meds = useMedications();
 
   const medName = useMemo(() => {

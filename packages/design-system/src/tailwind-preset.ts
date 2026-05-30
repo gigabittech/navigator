@@ -25,6 +25,17 @@ const preset: Partial<Config> = {
         "surface-overlay": "var(--surface-overlay)",
         "surface-tint-accent": "var(--surface-tint-accent)",
 
+        // Deep ink (dark chrome ink steps)
+        "ink-700": "var(--ink-700)",
+        "ink-800": "var(--ink-800)",
+        "ink-900": "var(--ink-900)",
+
+        // Dark chrome surfaces (always-dark sidebar / panels)
+        "surface-sidebar": "var(--surface-sidebar)",
+        "surface-sidebar-raised": "var(--surface-sidebar-raised)",
+        "surface-on-dark-active": "var(--surface-on-dark-active)",
+        "surface-on-dark-hover": "var(--surface-on-dark-hover)",
+
         // Foreground
         "fg-1": "var(--fg-1)",
         "fg-2": "var(--fg-2)",
@@ -33,11 +44,19 @@ const preset: Partial<Config> = {
         "fg-accent": "var(--fg-accent)",
         "fg-on-accent": "var(--fg-on-accent)",
 
+        // Foreground on dark chrome
+        "fg-on-dark": "var(--fg-on-dark)",
+        "fg-on-dark-muted": "var(--fg-on-dark-muted)",
+        "fg-on-dark-faint": "var(--fg-on-dark-faint)",
+        "fg-on-dark-ghost": "var(--fg-on-dark-ghost)",
+
         // Borders (use via ring-/border-)
         "border-subtle": "var(--border-subtle)",
         "border-card": "var(--border-card)",
         "border-strong": "var(--border-strong)",
         "border-accent": "var(--border-accent)",
+        "border-on-dark": "var(--border-on-dark)",
+        "border-on-dark-subtle": "var(--border-on-dark-subtle)",
 
         // Brand accent
         "accent-50": "var(--color-accent-50)",
@@ -50,6 +69,14 @@ const preset: Partial<Config> = {
         "accent-700": "var(--color-accent-700)",
         "accent-fg": "var(--color-accent-fg)",
         "accent-bg": "var(--color-accent-bg)",
+
+        // Gold brand accent
+        "accent-gold-500": "var(--accent-gold-500)",
+        "accent-gold-600": "var(--accent-gold-600)",
+        "accent-gold-700": "var(--accent-gold-700)",
+        "accent-gold-on-dark": "var(--accent-gold-on-dark)",
+        "accent-gold-bg": "var(--accent-gold-bg)",
+        "accent-gold-bd": "var(--accent-gold-bd)",
 
         // Semantic
         "success-fg": "var(--color-success-fg)",

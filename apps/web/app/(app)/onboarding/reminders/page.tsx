@@ -66,7 +66,7 @@ export default function RemindersPage() {
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--navy-400)",
+              color: "var(--fg-onboarding-muted)",
             }}
           >
             Step 3 of 4
@@ -79,7 +79,7 @@ export default function RemindersPage() {
               lineHeight: 1.1,
               marginTop: 2,
               marginBottom: 0,
-              color: "var(--navy-800)",
+              color: "var(--fg-onboarding-title)",
             }}
           >
             When should we nudge you?
@@ -88,7 +88,7 @@ export default function RemindersPage() {
             style={{
               marginTop: 8,
               fontSize: 14,
-              color: "var(--navy-500)",
+              color: "var(--fg-onboarding-body)",
               lineHeight: 1.5,
             }}
           >
@@ -100,8 +100,8 @@ export default function RemindersPage() {
         {/* Reminder slots card */}
         <div
           style={{
-            background: "white",
-            border: "1px solid rgba(14, 27, 48, 0.06)",
+            background: "var(--surface-onboarding-card)",
+            border: "1px solid var(--border-onboarding-subtle)",
             borderRadius: 16,
             overflow: "hidden",
             marginBottom: 10,
@@ -122,7 +122,7 @@ export default function RemindersPage() {
                   padding: "14px 16px",
                   borderBottom:
                     i < DEFAULT_SLOTS.length - 1
-                      ? "1px solid rgba(14, 27, 48, 0.05)"
+                      ? "1px solid var(--border-onboarding-subtle)"
                       : "none",
                 }}
               >
@@ -133,9 +133,9 @@ export default function RemindersPage() {
                     height: 36,
                     borderRadius: 10,
                     background: on
-                      ? "rgba(15, 110, 86, 0.10)"
-                      : "rgba(14, 27, 48, 0.05)",
-                    color: on ? "var(--emerald-600)" : "var(--navy-400)",
+                      ? "var(--onboarding-accent-tint)"
+                      : "var(--surface-onboarding-sunk)",
+                    color: on ? "var(--onboarding-accent)" : "var(--fg-onboarding-muted)",
                     display: "grid",
                     placeItems: "center",
                     transition: "background 200ms, color 200ms",
@@ -151,7 +151,7 @@ export default function RemindersPage() {
                     style={{
                       fontSize: 14,
                       fontWeight: 700,
-                      color: "var(--navy-800)",
+                      color: "var(--fg-onboarding-title)",
                     }}
                   >
                     {slot.label}
@@ -159,7 +159,7 @@ export default function RemindersPage() {
                   <div
                     style={{
                       fontSize: 11.5,
-                      color: "var(--navy-400)",
+                      color: "var(--fg-onboarding-muted)",
                       marginTop: 2,
                     }}
                   >
@@ -189,8 +189,8 @@ export default function RemindersPage() {
             width: "100%",
             padding: "16px 22px",
             background: "transparent",
-            color: "var(--navy-800)",
-            border: "1px solid rgba(14, 27, 48, 0.16)",
+            color: "var(--fg-onboarding-title)",
+            border: "1px solid var(--border-onboarding-strong)",
             borderRadius: 14,
             fontSize: 15,
             fontWeight: 600,
@@ -210,8 +210,8 @@ export default function RemindersPage() {
         {/* School-day mode card */}
         <div
           style={{
-            background: "rgba(250, 250, 247, 0.60)",
-            border: "1px dashed rgba(14, 27, 48, 0.12)",
+            background: "var(--surface-onboarding)",
+            border: "1px dashed var(--border-onboarding)",
             borderRadius: 16,
             padding: 16,
             marginBottom: 20,
@@ -229,7 +229,7 @@ export default function RemindersPage() {
               style={{
                 fontSize: 14,
                 fontWeight: 700,
-                color: "var(--navy-800)",
+                color: "var(--fg-onboarding-title)",
               }}
             >
               School-day mode
@@ -243,7 +243,7 @@ export default function RemindersPage() {
           <p
             style={{
               fontSize: 12,
-              color: "var(--navy-500)",
+              color: "var(--fg-onboarding-body)",
               margin: 0,
               lineHeight: 1.45,
             }}
@@ -263,14 +263,14 @@ export default function RemindersPage() {
             gap: 8,
             width: "100%",
             padding: "16px 22px",
-            background: "var(--emerald-600)",
-            color: "white",
+            background: "var(--onboarding-accent)",
+            color: "var(--fg-on-dark)",
             border: "none",
             borderRadius: 14,
             fontSize: 15,
             fontWeight: 600,
             fontFamily: "inherit",
-            boxShadow: "0 8px 20px -6px rgba(15, 110, 86, 0.4)",
+            boxShadow: "var(--onboarding-accent-shadow)",
             cursor: "pointer",
             minHeight: 44,
           }}
@@ -303,7 +303,7 @@ function Toggle({
       style={{
         width: 38,
         height: 22,
-        background: on ? "var(--emerald-500)" : "rgba(14, 27, 48, 0.12)",
+        background: on ? "var(--onboarding-accent)" : "var(--border-onboarding-strong)",
         borderRadius: 9999,
         position: "relative",
         border: "none",
@@ -320,7 +320,7 @@ function Toggle({
           width: 18,
           height: 18,
           borderRadius: "50%",
-          background: "white",
+          background: "var(--surface-onboarding-card)",
           top: 2,
           left: on ? "calc(100% - 20px)" : 2,
           boxShadow: "0 1px 2px rgba(0,0,0,0.10)",

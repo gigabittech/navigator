@@ -1,8 +1,12 @@
 /**
- * Supabase clients.
+ * Client-safe Supabase browser client.
  *
- *   - createBrowserClient()  — client components / hooks
- *   - createServerSupabase() — Route Handlers + Server Actions (reads cookies)
+ *   - createBrowserClient() — client components / hooks
+ *
+ * This module is import-safe from "use client" code: it must NOT pull in
+ * next/headers or any server-only API. The server client (which reads the
+ * request cookie store) lives in ./supabase-server so a client bundle never
+ * transitively imports next/headers.
  *
  * Auth is optional. In local single-device mode none of this runs — the app
  * works without a backend. When NEXT_PUBLIC_SUPABASE_URL + anon key are set,
@@ -12,42 +16,11 @@
  * Edge Functions only.
  */
 
-import {
-  createBrowserClient as _createBrowserClient,
-  createServerClient,
-  type CookieOptions,
-} from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-type CookieToSet = { name: string; value: string; options?: CookieOptions };
+import { createBrowserClient as _createBrowserClient } from "@supabase/ssr";
 
 export function createBrowserClient() {
   return _createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-}
-
-/** Server-side Supabase client backed by the request cookie store. */
-export function createServerSupabase() {
-  const cookieStore = cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (toSet: CookieToSet[]) => {
-          try {
-            for (const { name, value, options } of toSet) {
-              cookieStore.set(name, value, options);
-            }
-          } catch {
-            // setAll is called from Server Components where mutation is a no-op;
-            // session refresh in middleware covers that case.
-          }
-        },
-      },
-    },
   );
 }

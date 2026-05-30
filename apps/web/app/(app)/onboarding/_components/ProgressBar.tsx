@@ -24,7 +24,7 @@ export function ProgressBar({ step }: { step: 0 | 1 | 2 | 3 }) {
           style={{
             height: 4,
             flex: 1,
-            background: i <= step ? "var(--emerald-500)" : "rgba(14, 27, 48, 0.08)",
+            background: i <= step ? "var(--onboarding-accent)" : "var(--border-onboarding-subtle)",
             borderRadius: 2,
             transition: "background 200ms ease",
           }}

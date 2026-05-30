@@ -86,8 +86,13 @@ const DOSE_MISSED_TYPES = new Set([
  *  3. Trigger clusters (top 3 tags over last 30 days)
  *
  * All reads are reactive via useLiveQuery — no network involved.
+ *
+ * Pass `childId` (from `useChild`) to scope reads to one child — this uses the
+ * (child_id, occurred_at DESC) index and prevents data mixing once there is
+ * more than one child. When omitted, falls back to all rows (single-child
+ * local mode).
  */
-export function usePatterns(): PatternsData {
+export function usePatterns(childId?: string): PatternsData {
   const sevenDaysAgo = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - 7);
@@ -100,37 +105,72 @@ export function usePatterns(): PatternsData {
     return d.toISOString();
   }, []);
 
+  const DOSE_EVENT_TYPES = useMemo(
+    () => [
+      "MedicationDoseTaken",
+      "MedicationDoseLate",
+      "MedicationDoseMissed",
+      "MedicationDoseRefused",
+      "MedicationDoseVomited",
+    ],
+    [],
+  );
+
   // Observations in the last 7 days — for wear-off window.
   const obsResult = useLiveQuery<EventRow>(
-    `SELECT ${EVENT_COLUMNS} FROM log_events
+    childId
+      ? `SELECT ${EVENT_COLUMNS} FROM log_events
+         WHERE child_id = $1
+         AND   event_type = ANY($2::text[])
+         AND   occurred_at >= $3
+         ORDER BY occurred_at ASC`
+      : `SELECT ${EVENT_COLUMNS} FROM log_events
      WHERE event_type = ANY($1::text[])
      AND   occurred_at >= $2
      ORDER BY occurred_at ASC`,
-    [OBSERVATION_TYPES as unknown as string[], sevenDaysAgo],
+    childId
+      ? [childId, OBSERVATION_TYPES as unknown as string[], sevenDaysAgo]
+      : [OBSERVATION_TYPES as unknown as string[], sevenDaysAgo],
+  );
+
+  // Observations in the last 30 days — for trigger-cluster tag tally.
+  const obs30Result = useLiveQuery<EventRow>(
+    childId
+      ? `SELECT ${EVENT_COLUMNS} FROM log_events
+         WHERE child_id = $1
+         AND   event_type = ANY($2::text[])
+         AND   occurred_at >= $3
+         ORDER BY occurred_at ASC`
+      : `SELECT ${EVENT_COLUMNS} FROM log_events
+     WHERE event_type = ANY($1::text[])
+     AND   occurred_at >= $2
+     ORDER BY occurred_at ASC`,
+    childId
+      ? [childId, OBSERVATION_TYPES as unknown as string[], thirtyDaysAgo]
+      : [OBSERVATION_TYPES as unknown as string[], thirtyDaysAgo],
   );
 
   // Dose events in the last 30 days — for adherence trend.
   const doseResult = useLiveQuery<EventRow>(
-    `SELECT ${EVENT_COLUMNS} FROM log_events
+    childId
+      ? `SELECT ${EVENT_COLUMNS} FROM log_events
+         WHERE child_id = $1
+         AND   event_type = ANY($2::text[])
+         AND   occurred_at >= $3
+         ORDER BY occurred_at ASC`
+      : `SELECT ${EVENT_COLUMNS} FROM log_events
      WHERE event_type = ANY($1::text[])
      AND   occurred_at >= $2
      ORDER BY occurred_at ASC`,
-    [
-      [
-        "MedicationDoseTaken",
-        "MedicationDoseLate",
-        "MedicationDoseMissed",
-        "MedicationDoseRefused",
-        "MedicationDoseVomited",
-      ],
-      thirtyDaysAgo,
-    ],
+    childId
+      ? [childId, DOSE_EVENT_TYPES, thirtyDaysAgo]
+      : [DOSE_EVENT_TYPES, thirtyDaysAgo],
   );
 
-  const loading = !obsResult || !doseResult;
+  const loading = !obsResult || !obs30Result || !doseResult;
 
   const derived = useMemo<Omit<PatternsData, "loading">>(() => {
-    if (!obsResult || !doseResult) {
+    if (!obsResult || !obs30Result || !doseResult) {
       return {
         wearOffBuckets: WEAR_OFF_LABELS.map((label) => ({ label, value: 0 })),
         adherenceWeeks: [0, 1, 2, 3].map((week) => ({ week, rate: 0 })),
@@ -232,17 +272,12 @@ export function usePatterns(): PatternsData {
         : "—";
 
     // ── Chart 3: Trigger clusters ───────────────────────────────────────
-    // Tally tags from all observation events in the last 30 days.
-    // Uses the same query result (obsResult) which covers 7 days; we need
-    // a separate query for 30-day tag tallying.
-    // NOTE: obsResult only covers 7 days but is reused here for the tag
-    // tally. A separate 30-day obs query is used below.
-    // The doseResult covers 30 days but holds dose events, not tags.
-    // We tally tags from obsResult (7-day window) as an approximation here
-    // and complement with the 30-day window in the dedicated query below.
+    // Tally tags from all observation events in the last 30 days. This uses
+    // the dedicated 30-day observation query (obs30Result) so the data and
+    // the "last 30 days" label agree — obsResult only covers 7 days.
     const tagCounts = new Map<string, number>();
 
-    for (const row of obsResult.rows) {
+    for (const row of obs30Result.rows) {
       const payload = row.payload as Record<string, unknown>;
       const tags = Array.isArray(payload["tags"])
         ? (payload["tags"] as string[])
@@ -264,10 +299,12 @@ export function usePatterns(): PatternsData {
     }));
 
     const hasData =
-      obsResult.rows.length > 0 || doseResult.rows.length > 0;
+      obsResult.rows.length > 0 ||
+      obs30Result.rows.length > 0 ||
+      doseResult.rows.length > 0;
 
     return { wearOffBuckets, adherenceWeeks, adherencePct, triggers, hasData };
-  }, [obsResult, doseResult]);
+  }, [obsResult, obs30Result, doseResult]);
 
   return { ...derived, loading };
 }

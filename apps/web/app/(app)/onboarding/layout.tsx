@@ -10,7 +10,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
       <div
         style={{
           minHeight: "100dvh",
-          background: "var(--cream-100)",
+          background: "var(--surface-onboarding)",
           display: "flex",
           flexDirection: "column",
           fontFamily: "var(--font-sans)",

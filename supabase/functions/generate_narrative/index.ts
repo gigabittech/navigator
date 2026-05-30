@@ -4,10 +4,16 @@
 // clinician-fluent summary. Runs on Deno; never exposed to the client except
 // through this function (the Anthropic key stays server-side).
 //
+// Security: the gateway verifies the JWT, but we additionally authorize the
+// payload — the caller must own or collaborate on the `childId` they reference
+// before we send anything to Anthropic.
+//
 // Deploy:  supabase functions deploy generate_narrative
 // Secrets: supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 
-import { corsHeaders, json } from "../_shared/cors.ts";
+import { handlePreflight, isOriginAllowed, json } from "../_shared/cors.ts";
+import { getAuthedUser, isUuid, userCanAccessChild } from "../_shared/auth.ts";
+import { redact } from "../_shared/redact.ts";
 
 // deno-lint-ignore no-explicit-any
 type AnyReport = any;
@@ -37,14 +43,32 @@ function buildPrompt(report: AnyReport): string {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") return handlePreflight(req);
+
+  // Fail closed on disallowed origins before doing any work.
+  if (!isOriginAllowed(req)) {
+    return json(req, { error: "Request not allowed." }, 403);
+  }
 
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) return json({ error: "Narrative is not configured on this server." }, 501);
+  if (!apiKey) return json(req, { error: "Narrative is not configured on this server." }, 501);
 
   try {
-    const { report } = await req.json();
-    if (!report) return json({ error: "Missing report." }, 400);
+    const user = await getAuthedUser(req);
+    if (!user) return json(req, { error: "Not signed in." }, 401);
+
+    const body = await req.json().catch(() => null);
+    const report = body?.report;
+    const childId = body?.childId ?? report?.child?.id;
+
+    if (!report) return json(req, { error: "Missing report." }, 400);
+    if (!isUuid(childId)) return json(req, { error: "Missing or invalid child reference." }, 400);
+
+    // Authorize the payload against the caller — generic error, no leakage of
+    // whether the child exists.
+    if (!(await userCanAccessChild(user, childId))) {
+      return json(req, { error: "Not allowed." }, 403);
+    }
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -61,12 +85,16 @@ Deno.serve(async (req) => {
     });
 
     if (!res.ok) {
-      return json({ error: `Anthropic returned ${res.status}.` }, 502);
+      // Log the upstream status only — never the prompt/report (PII).
+      console.error("anthropic_error", redact({ status: res.status }));
+      return json(req, { error: "The summary service is unavailable." }, 502);
     }
     const data = await res.json();
     const narrative = data?.content?.[0]?.text?.trim() ?? "";
-    return json({ narrative });
+    return json(req, { narrative });
   } catch (err) {
-    return json({ error: err instanceof Error ? err.message : "Unknown error" }, 500);
+    // Never echo internal error detail to the client, and redact before logging.
+    console.error("generate_narrative_error", redact({ name: err instanceof Error ? err.name : "unknown" }));
+    return json(req, { error: "Something went wrong generating the summary." }, 500);
   }
 });

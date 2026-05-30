@@ -16,7 +16,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-accent-600 text-fg-on-accent hover:bg-accent-700 focus-visible:shadow-glow-accent active:scale-[0.98] shadow-sm",
+    "bg-accent-600 text-fg-on-accent hover:bg-accent-700 active:scale-[0.98] shadow-sm",
   secondary:
     "bg-surface-card text-fg-1 border border-border-card hover:bg-surface-card-alt active:scale-[0.98]",
   ghost: "bg-transparent text-fg-2 hover:bg-surface-card-alt active:scale-[0.98]",
@@ -49,7 +49,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       className={cn(
         "inline-flex items-center justify-center font-semibold whitespace-nowrap select-none",
         "transition-[transform,background-color,box-shadow] duration-fast ease-standard",
-        "focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-border-accent focus-visible:ring-offset-surface-page",
+        "disabled:opacity-50 disabled:pointer-events-none",
         "min-h-tap", // 44px tap target floor
         variantClasses[variant],
         sizeClasses[size],

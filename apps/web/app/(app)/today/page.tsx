@@ -27,7 +27,7 @@ type ActiveOverlay = "sheet" | "voice" | "tags" | "school" | null;
  */
 export default function TodayPage() {
   const child = useChild();
-  const { slots, loading } = useTodayDoses();
+  const { slots, loading } = useTodayDoses(child?.id);
   const db = usePGlite();
 
   const [overlay, setOverlay] = useState<ActiveOverlay>(null);
@@ -152,7 +152,7 @@ function SchoolEventSheet({ db, onClose }: SchoolEventSheetProps) {
         style={{
           borderRadius: "24px 24px 0 0",
           padding: "12px 20px calc(var(--safe-bottom) + 28px)",
-          boxShadow: "0 -20px 60px -10px rgba(14,27,48,0.18)",
+          boxShadow: "var(--shadow-sheet)",
         }}
       >
         {/* Grabber */}
@@ -163,7 +163,7 @@ function SchoolEventSheet({ db, onClose }: SchoolEventSheetProps) {
             width: 40,
             height: 4,
             borderRadius: 9999,
-            background: "rgba(14,27,48,0.18)",
+            background: "var(--surface-grabber)",
           }}
         />
 
@@ -202,10 +202,10 @@ function SchoolEventSheet({ db, onClose }: SchoolEventSheetProps) {
             type="button"
             onClick={() => void save()}
             disabled={saving}
-            className="min-h-tap flex flex-1 items-center justify-center rounded-xl text-sm font-semibold text-white transition-opacity duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot disabled:opacity-50"
+            className="min-h-tap flex flex-1 items-center justify-center rounded-xl text-sm font-semibold text-fg-on-accent transition-opacity duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot disabled:opacity-50"
             style={{
-              background: "var(--emerald-600)",
-              boxShadow: "0 8px 20px -6px rgba(15,110,86,0.40)",
+              background: "var(--cta-success)",
+              boxShadow: "var(--shadow-cta-success)",
             }}
           >
             {saving ? "Saving…" : "Save event"}

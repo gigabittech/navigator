@@ -88,7 +88,7 @@ function getInitials(name: string): string {
 
 function DesktopSidebar({ pathname }: { pathname: string }) {
   const child = useChild();
-  const nextAppt = useNextAppointment();
+  const nextAppt = useNextAppointment(child?.id);
   const authUser = useAuthUser();
 
   const apptDate =
@@ -113,22 +113,18 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
           "flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] text-[13.5px] font-medium",
           "w-full transition-colors duration-fast",
           active
-            ? "bg-emerald-700/20 text-[#F9F8F4] font-semibold"
-            : "text-[rgba(252,251,246,0.72)] hover:bg-[rgba(252,251,246,0.04)] hover:text-[#F9F8F4]",
+            ? "bg-surface-on-dark-active text-fg-on-dark font-semibold"
+            : "text-fg-on-dark-muted hover:bg-surface-on-dark-hover hover:text-fg-on-dark",
         ].join(" ")}
       >
         <Icon
           size={16}
           aria-hidden
-          className={
-            active
-              ? "text-emerald-400 shrink-0"
-              : "text-[rgba(252,251,246,0.42)] shrink-0"
-          }
+          className={active ? "text-success-dot shrink-0" : "text-fg-on-dark-ghost shrink-0"}
         />
         <span className="truncate">{item.label}</span>
         {item.apptBadge && apptDate ? (
-          <span className="ml-auto font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500 text-[#0E1B30]">
+          <span className="ml-auto font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-warning-dot text-ink-800">
             {apptDate}
           </span>
         ) : null}
@@ -139,7 +135,7 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
   function NavSection({ label, items }: { label: string; items: SideNavItem[] }) {
     return (
       <>
-        <div className="font-mono text-[10px] font-bold tracking-[0.10em] uppercase text-amber-400/80 px-2.5 pt-3.5 pb-1.5 mt-2">
+        <div className="font-mono text-[10px] font-bold tracking-[0.10em] uppercase text-accent-gold-on-dark px-2.5 pt-3.5 pb-1.5 mt-2">
           {label}
         </div>
         {items.map((item) => (
@@ -154,20 +150,17 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
   return (
     <aside
       className="hidden lg:flex lg:flex-col w-[240px] shrink-0 min-h-screen sticky top-0
-                 border-r border-[rgba(252,251,246,0.06)] px-3.5 py-5"
-      style={{ background: "var(--slate-900)", color: "var(--slate-100)" }}
+                 border-r border-on-dark-subtle px-3.5 py-5 bg-surface-sidebar text-fg-on-dark-muted"
     >
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-2 py-1 mb-5 font-black text-sm tracking-[0.18em] uppercase text-[#F9F8F4]">
+      <div className="flex items-center gap-2.5 px-2 py-1 mb-5 font-black text-sm tracking-[0.18em] uppercase text-fg-on-dark">
         <span
-          className="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-[#F9F8F4] shrink-0 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(150deg, var(--emerald-500), var(--emerald-700))",
-          }}
+          className="w-[30px] h-[30px] rounded-[9px] grid place-items-center text-fg-on-dark shrink-0 relative overflow-hidden"
+          style={{ background: "var(--gradient-brand-glyph)" }}
           aria-hidden
         >
           {/* Inner border ring */}
-          <span className="absolute inset-1 rounded-[6px] border border-[rgba(252,251,246,0.30)]" />
+          <span className="absolute inset-1 rounded-[6px] border border-on-dark" />
           <svg
             width={16}
             height={16}
@@ -190,24 +183,22 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
       {/* Child switcher */}
       <div
         className="flex items-center gap-2.5 px-3 py-2.5 mb-4 rounded-[12px] cursor-pointer
-                   bg-[rgba(252,251,246,0.06)] border border-[rgba(252,251,246,0.10)]"
+                   bg-surface-sidebar-raised border border-on-dark"
       >
         <span
-          className="w-8 h-8 rounded-full grid place-items-center text-white text-xs font-bold shrink-0"
-          style={{
-            background: "linear-gradient(135deg, var(--emerald-500), var(--emerald-700))",
-          }}
+          className="w-8 h-8 rounded-full grid place-items-center text-fg-on-dark text-xs font-bold shrink-0"
+          style={{ background: "var(--gradient-brand-glyph-135)" }}
           aria-hidden
         >
           {childInitials}
         </span>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-semibold text-[#F9F8F4] truncate">
+          <div className="text-[13px] font-semibold text-fg-on-dark truncate">
             {child?.preferredName ?? "Loading…"}
           </div>
-          <div className="text-[11px] mt-0.5 text-[rgba(252,251,246,0.50)]">Your child</div>
+          <div className="text-[11px] mt-0.5 text-fg-on-dark-faint">Your child</div>
         </div>
-        <ChevronDown size={12} className="text-[rgba(252,251,246,0.42)] shrink-0" aria-hidden />
+        <ChevronDown size={12} className="text-fg-on-dark-ghost shrink-0" aria-hidden />
       </div>
 
       {/* Nav */}
@@ -218,10 +209,9 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
       </nav>
 
       {/* User footer */}
-      <div className="mt-auto pt-3 border-t border-[rgba(252,251,246,0.06)] flex items-center gap-2.5">
+      <div className="mt-auto pt-3 border-t border-on-dark-subtle flex items-center gap-2.5">
         <span
-          className="w-7 h-7 rounded-full grid place-items-center text-[11px] font-bold text-[#F9F8F4] shrink-0"
-          style={{ background: "rgba(252,251,246,0.12)" }}
+          className="w-7 h-7 rounded-full grid place-items-center text-[11px] font-bold text-fg-on-dark shrink-0 bg-surface-sidebar-raised"
           aria-hidden
         >
           {authUser?.email
@@ -231,21 +221,21 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
         <div className="min-w-0 flex-1">
           {isSupabaseConfigured() && authUser ? (
             <>
-              <div className="text-[#F9F8F4] font-semibold truncate text-[12px]">
+              <div className="text-fg-on-dark font-semibold truncate text-[12px]">
                 {authUser.email ?? "Signed in"}
               </div>
-              <div className="text-[11px] truncate text-[rgba(252,251,246,0.50)]">
+              <div className="text-[11px] truncate text-fg-on-dark-faint">
                 Your account
               </div>
             </>
           ) : (
             <>
-              <div className="text-[#F9F8F4] font-semibold truncate text-[12px]">
+              <div className="text-fg-on-dark font-semibold truncate text-[12px]">
                 Local mode
               </div>
               <Link
                 href="/sign-in"
-                className="text-[11px] truncate text-[rgba(252,251,246,0.50)] hover:text-[rgba(252,251,246,0.75)] transition-colors"
+                className="text-[11px] truncate text-fg-on-dark-faint hover:text-fg-on-dark-muted transition-colors"
               >
                 Sign in
               </Link>
@@ -264,8 +254,7 @@ function DesktopTopbar() {
   return (
     <div
       className="hidden lg:flex items-center justify-between gap-4 px-7 h-[52px]
-                 border-b border-border-subtle sticky top-0 z-10"
-      style={{ background: "rgba(250,250,247,0.85)", backdropFilter: "blur(12px)" }}
+                 border-b border-border-subtle sticky top-0 z-10 bg-surface-page/85 backdrop-blur"
     >
       {/* Search */}
       <div
@@ -281,7 +270,7 @@ function DesktopTopbar() {
                      placeholder:text-fg-4 cursor-default"
           aria-label="Search (coming soon)"
         />
-        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[rgba(14,27,48,0.04)] text-fg-4 shrink-0">
+        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-[5px] bg-surface-sunk text-fg-4 shrink-0">
           ⌘ K
         </span>
       </div>

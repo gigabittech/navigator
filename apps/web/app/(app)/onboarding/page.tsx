@@ -49,8 +49,8 @@ export default function WelcomePage() {
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: "0.08em",
-            color: "var(--emerald-600)",
-            background: "rgba(15, 110, 86, 0.10)",
+            color: "var(--onboarding-accent)",
+            background: "var(--onboarding-accent-tint)",
             padding: "4px 10px",
             borderRadius: 9999,
             marginBottom: 24,
@@ -65,10 +65,10 @@ export default function WelcomePage() {
             width: 84,
             height: 84,
             borderRadius: 20,
-            background: "linear-gradient(150deg, var(--emerald-500), var(--emerald-700))",
+            background: "var(--gradient-brand-glyph)",
             display: "grid",
             placeItems: "center",
-            color: "white",
+            color: "var(--fg-on-dark)",
             boxShadow: "0 16px 36px -12px rgba(15, 110, 86, 0.45)",
             marginBottom: 32,
             position: "relative",
@@ -81,7 +81,7 @@ export default function WelcomePage() {
             style={{
               position: "absolute",
               inset: 8,
-              border: "1.5px solid rgba(252, 251, 246, 0.30)",
+              border: "1.5px solid var(--border-on-dark)",
               borderRadius: 12,
             }}
           />
@@ -108,7 +108,7 @@ export default function WelcomePage() {
             letterSpacing: "-0.025em",
             lineHeight: 1.05,
             margin: "0 0 12px",
-            color: "var(--navy-800)",
+            color: "var(--fg-onboarding-title)",
           }}
         >
           One place for your{" "}
@@ -116,7 +116,7 @@ export default function WelcomePage() {
             style={{
               fontStyle: "italic",
               fontWeight: 400,
-              color: "var(--gold-600)",
+              color: "var(--accent-gold-600)",
             }}
           >
             child&rsquo;s
@@ -127,7 +127,7 @@ export default function WelcomePage() {
         <p
           style={{
             fontSize: 15,
-            color: "var(--navy-500)",
+            color: "var(--fg-onboarding-body)",
             lineHeight: 1.55,
             margin: 0,
           }}
@@ -149,14 +149,14 @@ export default function WelcomePage() {
             gap: 8,
             width: "100%",
             padding: "16px 22px",
-            background: "var(--emerald-600)",
-            color: "white",
+            background: "var(--onboarding-accent)",
+            color: "var(--fg-on-dark)",
             border: "none",
             borderRadius: 14,
             fontSize: 15,
             fontWeight: 600,
             fontFamily: "inherit",
-            boxShadow: "0 8px 20px -6px rgba(15, 110, 86, 0.4)",
+            boxShadow: "var(--onboarding-accent-shadow)",
             cursor: "pointer",
             minHeight: 44,
           }}
@@ -176,8 +176,8 @@ export default function WelcomePage() {
             width: "100%",
             padding: "16px 22px",
             background: "transparent",
-            color: "var(--navy-800)",
-            border: "1px solid rgba(14, 27, 48, 0.16)",
+            color: "var(--fg-onboarding-title)",
+            border: "1px solid var(--border-onboarding-strong)",
             borderRadius: 14,
             fontSize: 15,
             fontWeight: 600,

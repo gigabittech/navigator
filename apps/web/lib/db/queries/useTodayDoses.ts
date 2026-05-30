@@ -16,18 +16,27 @@ interface TodayDoses {
  * Today's medication slots with their resolved status. Slots are derived from
  * each active medication's `scheduled_times`; status is overlaid by projecting
  * today's log_events. Un-logged slots show as "scheduled" (tap to log).
+ *
+ * Pass `childId` (from `useChild`) to scope reads to one child — this uses the
+ * (child_id, occurred_at DESC) index and prevents data mixing once there is
+ * more than one child. When omitted, falls back to all rows (single-child
+ * local mode).
  */
-export function useTodayDoses(): TodayDoses {
+export function useTodayDoses(childId?: string): TodayDoses {
   const meds = useLiveQuery<MedicationRow>(
-    `SELECT ${MEDICATION_COLUMNS} FROM medications WHERE active = true ORDER BY name`,
-    [],
+    childId
+      ? `SELECT ${MEDICATION_COLUMNS} FROM medications WHERE child_id = $1 AND active = true ORDER BY name`
+      : `SELECT ${MEDICATION_COLUMNS} FROM medications WHERE active = true ORDER BY name`,
+    childId ? [childId] : [],
   );
 
   // Stable for the component's lifetime so the live subscription isn't churned.
   const startIso = useMemo(() => startOfDay().toISOString(), []);
   const events = useLiveQuery<EventRow>(
-    `SELECT ${EVENT_COLUMNS} FROM log_events WHERE occurred_at >= $1 ORDER BY occurred_at ASC`,
-    [startIso],
+    childId
+      ? `SELECT ${EVENT_COLUMNS} FROM log_events WHERE child_id = $1 AND occurred_at >= $2 ORDER BY occurred_at ASC`
+      : `SELECT ${EVENT_COLUMNS} FROM log_events WHERE occurred_at >= $1 ORDER BY occurred_at ASC`,
+    childId ? [childId, startIso] : [startIso],
   );
 
   const slots = useMemo<DoseSlot[]>(() => {

@@ -66,17 +66,17 @@ interface CellConfig {
 }
 
 const ICON_BG: Record<CellConfig["variant"], string> = {
-  default: "rgba(15, 110, 86, 0.10)",
-  alt:     "rgba(14, 165, 233, 0.10)",
-  alt2:    "rgba(245, 158, 11, 0.12)",
-  alt3:    "rgba(201, 168, 76, 0.16)",
+  default: "var(--cta-success-tint)",
+  alt:     "var(--color-info-bg)",
+  alt2:    "var(--color-warning-bg)",
+  alt3:    "var(--accent-gold-bg)",
 };
 
 const ICON_COLOR: Record<CellConfig["variant"], string> = {
-  default: "var(--emerald-600)",
-  alt:     "var(--sky-600)",
-  alt2:    "var(--amber-600)",
-  alt3:    "#C9A84C",
+  default: "var(--color-success-fg)",
+  alt:     "var(--color-info-fg)",
+  alt2:    "var(--color-warning-fg)",
+  alt3:    "var(--accent-gold-600)",
 };
 
 function QuickCell({ icon, title, subtitle, variant, onClick }: CellConfig) {
@@ -84,9 +84,10 @@ function QuickCell({ icon, title, subtitle, variant, onClick }: CellConfig) {
     <button
       type="button"
       onClick={onClick}
+      className="min-h-tap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page"
       style={{
-        background: "white",
-        border: "1px solid rgba(14, 27, 48, 0.08)",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-subtle)",
         borderRadius: 14,
         padding: 16,
         display: "grid",
@@ -179,12 +180,12 @@ export function QuickAddGrid({
   return (
     <div
       style={{
-        background: "white",
-        border: "1px solid rgba(14, 27, 48, 0.06)",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-subtle)",
         borderRadius: 16,
         padding: 16,
         marginBottom: 14,
-        boxShadow: "0 1px 2px rgba(14, 27, 48, 0.04)",
+        boxShadow: "var(--shadow-sm)",
       }}
     >
       <div

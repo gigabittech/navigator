@@ -21,8 +21,13 @@ const LOOK_BACK_DAYS = 7;
  * Returns a pattern summary if 3+ distinct calendar days in the last 7 days
  * had a BehaviorObserved event with irritability/wear-off tags occurring
  * between 14:00 and 17:00.
+ *
+ * Pass `childId` (from `useChild`) to scope reads to one child — this uses the
+ * (child_id, occurred_at DESC) index and prevents data mixing once there is
+ * more than one child. When omitted, falls back to all rows (single-child
+ * local mode).
  */
-export function useWearOffPattern(): WearOffPattern {
+export function useWearOffPattern(childId?: string): WearOffPattern {
   const since = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - LOOK_BACK_DAYS);
@@ -30,11 +35,17 @@ export function useWearOffPattern(): WearOffPattern {
   }, []);
 
   const res = useLiveQuery<EventRow>(
-    `SELECT ${EVENT_COLUMNS} FROM log_events
+    childId
+      ? `SELECT ${EVENT_COLUMNS} FROM log_events
+         WHERE child_id = $1
+           AND event_type = 'BehaviorObserved'
+           AND occurred_at >= $2
+         ORDER BY occurred_at DESC`
+      : `SELECT ${EVENT_COLUMNS} FROM log_events
      WHERE event_type = 'BehaviorObserved'
        AND occurred_at >= $1
      ORDER BY occurred_at DESC`,
-    [since],
+    childId ? [childId, since] : [since],
   );
 
   return useMemo((): WearOffPattern => {

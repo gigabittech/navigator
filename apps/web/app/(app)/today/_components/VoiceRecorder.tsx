@@ -28,9 +28,9 @@ const TAG_PATTERNS: Array<{ pattern: RegExp; kind: TagKind }> = [
 ];
 
 const TAG_STYLES: Record<TagKind, { bg: string; color: string }> = {
-  mood: { bg: "rgba(14,165,233,0.12)", color: "var(--sky-600)" },
-  trigger: { bg: "rgba(245,158,11,0.14)", color: "var(--amber-600)" },
-  energy: { bg: "rgba(15,110,86,0.10)", color: "var(--emerald-600)" },
+  mood: { bg: "var(--color-info-bg)", color: "var(--color-info-fg)" },
+  trigger: { bg: "var(--color-warning-bg)", color: "var(--color-warning-fg)" },
+  energy: { bg: "var(--cta-success-tint)", color: "var(--color-success-fg)" },
 };
 
 /** Annotate a plain transcript string with inline span tags. */
@@ -267,26 +267,32 @@ export function VoiceRecorder({ onClose }: VoiceRecorderProps) {
             </>
           ) : null}
 
-          {/* Mic button */}
+          {/* Mic button — a single stable control across every state, so
+              keyboard focus never lands on a vanishing target. */}
           <button
             type="button"
-            aria-label={isRecording ? "Currently recording" : "Start recording"}
-            onClick={isRecording ? undefined : () => void startRecording()}
+            aria-label={isRecording ? "Stop recording and save" : "Start recording"}
+            aria-pressed={isRecording}
+            onClick={isRecording ? stopAndSave : () => void startRecording()}
             disabled={isWorking || isDone}
-            className="relative z-10 flex items-center justify-center rounded-full text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-success-dot disabled:opacity-60 transition-transform duration-base ease-out active:scale-95"
+            className="relative z-10 flex items-center justify-center rounded-full text-fg-on-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-success-dot disabled:opacity-60 transition-transform duration-base ease-out active:scale-95"
             style={{
               width: 96,
               height: 96,
-              background: "var(--emerald-600)",
-              boxShadow: "0 16px 36px -8px rgba(15,110,86,0.50)",
+              background: "var(--cta-success)",
+              boxShadow: "var(--shadow-cta-success-lg)",
             }}
           >
             <Mic size={36} aria-hidden />
           </button>
         </div>
 
-        {/* Heading */}
-        <h2 className="text-xl font-bold tracking-snug text-fg-1 mb-1.5">
+        {/* Heading — announces state transitions to assistive tech. */}
+        <h2
+          className="text-xl font-bold tracking-snug text-fg-1 mb-1.5"
+          role="status"
+          aria-live="polite"
+        >
           {isWorking ? "Saving…" : isDone ? "Saved" : isRecording ? "Listening…" : "Ready to record"}
         </h2>
 
@@ -303,7 +309,7 @@ export function VoiceRecorder({ onClose }: VoiceRecorderProps) {
         {isRecording ? (
           <p
             className="font-mono text-sm font-semibold mt-4"
-            style={{ color: "var(--emerald-600)" }}
+            style={{ color: "var(--color-success-fg)" }}
             aria-live="off"
           >
             {formatDuration(elapsed)}
@@ -327,7 +333,9 @@ export function VoiceRecorder({ onClose }: VoiceRecorderProps) {
 
         {/* Error message */}
         {errorMsg ? (
-          <p className="text-sm text-danger-fg mt-4 max-w-[30ch]">{errorMsg}</p>
+          <p className="text-sm text-danger-fg mt-4 max-w-[30ch]" role="alert">
+            {errorMsg}
+          </p>
         ) : null}
       </div>
 
@@ -348,10 +356,10 @@ export function VoiceRecorder({ onClose }: VoiceRecorderProps) {
           type="button"
           onClick={stopAndSave}
           disabled={!isRecording}
-          className="flex-1 min-h-tap flex items-center justify-center rounded-xl text-sm font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-colors duration-fast disabled:opacity-50"
+          className="flex-1 min-h-tap flex items-center justify-center rounded-xl text-sm font-semibold text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-colors duration-fast disabled:opacity-50"
           style={{
-            background: "var(--emerald-600)",
-            boxShadow: "0 8px 20px -6px rgba(15,110,86,0.40)",
+            background: "var(--cta-success)",
+            boxShadow: "var(--shadow-cta-success)",
           }}
         >
           Stop &amp; save

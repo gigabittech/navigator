@@ -92,12 +92,16 @@ export function ObservationComposer() {
         })}
       </div>
 
+      <label htmlFor="observation-note" className="sr-only">
+        Note
+      </label>
       <textarea
+        id="observation-note"
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="Add a note in your own words…"
         rows={2}
-        className="w-full rounded-md border border-border-card bg-surface-input px-3 py-2 text-base text-fg-1 placeholder:text-fg-4 focus:outline-none focus-within:border-border-accent"
+        className="w-full rounded-md border border-border-card bg-surface-input px-3 py-2 text-base text-fg-1 placeholder:text-fg-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-accent focus-visible:border-border-accent"
       />
 
       <div className="flex items-center gap-2 mt-3" role="group" aria-label="Where">
@@ -118,7 +122,11 @@ export function ObservationComposer() {
         ))}
       </div>
 
-      {error ? <p className="text-xs text-danger-fg mt-3">{error}</p> : null}
+      {error ? (
+        <p className="text-xs text-danger-fg mt-3" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex gap-2 mt-4">
         <Button onClick={save} disabled={saving}>

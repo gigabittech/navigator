@@ -15,15 +15,14 @@ export function FAB({ onOpen }: FABProps) {
       type="button"
       aria-label="Log something quickly"
       onClick={onOpen}
-      className="fixed z-40 flex items-center justify-center rounded-full text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-transform duration-fast ease-standard active:scale-95"
+      className="fixed z-40 flex items-center justify-center rounded-full text-fg-on-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-success-dot transition-transform duration-fast ease-standard active:scale-95"
       style={{
         right: 20,
         bottom: "calc(var(--safe-bottom) + 92px)",
         width: 56,
         height: 56,
-        background: "var(--emerald-600)",
-        boxShadow:
-          "0 12px 28px -6px rgba(15,110,86,0.50), 0 4px 10px rgba(0,0,0,0.08)",
+        background: "var(--cta-success)",
+        boxShadow: "var(--shadow-cta-success-float)",
       }}
     >
       {/* "+" icon drawn as two rectangles for full control over weight */}
@@ -35,8 +34,8 @@ export function FAB({ onOpen }: FABProps) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <rect x="10" y="2" width="2" height="18" rx="1" fill="white" />
-        <rect x="2" y="10" width="18" height="2" rx="1" fill="white" />
+        <rect x="10" y="2" width="2" height="18" rx="1" fill="currentColor" />
+        <rect x="2" y="10" width="18" height="2" rx="1" fill="currentColor" />
       </svg>
     </button>
   );
@@ -61,23 +60,60 @@ export function QuickLogSheet({
   onTag,
   onSchool,
 }: QuickLogSheetProps) {
-  // Trap focus inside the sheet while it is open.
   const sheetRef = useRef<HTMLDivElement>(null);
 
+  // Trap focus inside the sheet, restore it on close, and close on Escape.
   useEffect(() => {
-    const first = sheetRef.current?.querySelector<HTMLElement>(
-      "button, [tabindex]",
-    );
-    first?.focus();
-  }, []);
+    const sheet = sheetRef.current;
+    if (!sheet) return;
 
-  // Close on Escape.
-  useEffect(() => {
+    // Remember what had focus so we can restore it when the sheet closes.
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
+    const getFocusable = (root: HTMLElement) =>
+      Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+    // Move focus to the first focusable element on open.
+    getFocusable(sheet)[0]?.focus();
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      const root = sheetRef.current;
+      if (!root) return;
+      const focusable = getFocusable(root);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      const active = document.activeElement;
+      const insideSheet = active instanceof Node && root.contains(active);
+
+      if (e.shiftKey) {
+        if (active === first || !insideSheet) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !insideSheet) {
+        e.preventDefault();
+        first.focus();
+      }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      // Restore focus to wherever it was before the sheet opened.
+      previouslyFocused?.focus?.();
+    };
   }, [onClose]);
 
   return (
@@ -99,7 +135,7 @@ export function QuickLogSheet({
         style={{
           borderRadius: "24px 24px 0 0",
           padding: "12px 20px calc(var(--safe-bottom) + 32px)",
-          boxShadow: "0 -20px 60px -10px rgba(14,27,48,0.18)",
+          boxShadow: "var(--shadow-sheet)",
         }}
       >
         {/* Grabber */}
@@ -110,7 +146,7 @@ export function QuickLogSheet({
             width: 40,
             height: 4,
             borderRadius: 9999,
-            background: "rgba(14,27,48,0.18)",
+            background: "var(--surface-grabber)",
           }}
         />
 
@@ -163,7 +199,7 @@ export function QuickLogSheet({
         {/* Sync notice */}
         <div
           className="flex items-center gap-2.5 rounded-xl px-3.5 py-3 text-xs text-fg-2"
-          style={{ background: "rgba(15,110,86,0.06)" }}
+          style={{ background: "var(--cta-success-tint-soft)" }}
         >
           <CloudCheck
             size={16}

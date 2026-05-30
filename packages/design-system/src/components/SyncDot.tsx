@@ -7,6 +7,12 @@ export interface SyncDotProps extends HTMLAttributes<HTMLSpanElement> {
   state: SyncState;
   /** Render an inline text label after the dot. */
   showLabel?: boolean;
+  /**
+   * Announce state changes to screen readers via a polite live region.
+   * Opt-in — leave off for static labels (e.g. a sidebar) so the dot
+   * doesn't spam assistive tech on every render.
+   */
+  live?: boolean;
 }
 
 const stateLabel: Record<SyncState, string> = {
@@ -30,6 +36,7 @@ const stateDotClass: Record<SyncState, string> = {
 export function SyncDot({
   state,
   showLabel = false,
+  live = false,
   className,
   children,
   ...rest
@@ -37,15 +44,21 @@ export function SyncDot({
   return (
     <span
       className={cn("inline-flex items-center gap-2 text-xs text-fg-3", className)}
-      role="status"
-      aria-live="polite"
+      role={live ? "status" : undefined}
+      aria-live={live ? "polite" : undefined}
       {...rest}
     >
       <span
         aria-hidden
         className={cn("size-1.5 rounded-full", stateDotClass[state])}
       />
-      {showLabel ? <span>{children ?? stateLabel[state]}</span> : null}
+      {showLabel ? (
+        <span>{children ?? stateLabel[state]}</span>
+      ) : (
+        // Keep the state available to assistive tech even without a visible
+        // label, so it's never communicated by color alone.
+        <span className="sr-only">{children ?? stateLabel[state]}</span>
+      )}
     </span>
   );
 }

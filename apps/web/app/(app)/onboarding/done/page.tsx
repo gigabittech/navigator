@@ -168,10 +168,10 @@ export default function DonePage() {
           height: 96,
           margin: "0 auto 32px",
           borderRadius: "50%",
-          background: "rgba(15, 110, 86, 0.10)",
+          background: "var(--onboarding-accent-tint)",
           display: "grid",
           placeItems: "center",
-          color: "var(--emerald-600)",
+          color: "var(--onboarding-accent)",
         }}
         aria-hidden
       >
@@ -184,7 +184,7 @@ export default function DonePage() {
           fontWeight: 700,
           letterSpacing: "-0.025em",
           lineHeight: 1.05,
-          color: "var(--navy-800)",
+          color: "var(--fg-onboarding-title)",
           margin: "0 0 12px",
         }}
       >
@@ -194,7 +194,7 @@ export default function DonePage() {
       <p
         style={{
           fontSize: 15,
-          color: "var(--navy-500)",
+          color: "var(--fg-onboarding-body)",
           lineHeight: 1.55,
           margin: 0,
           maxWidth: 280,
@@ -209,8 +209,8 @@ export default function DonePage() {
         style={{
           marginTop: 32,
           padding: "16px 18px",
-          background: "white",
-          border: "1px solid rgba(14, 27, 48, 0.08)",
+          background: "var(--surface-onboarding-card)",
+          border: "1px solid var(--border-onboarding-subtle)",
           borderRadius: 14,
           width: "100%",
           maxWidth: 320,
@@ -222,7 +222,7 @@ export default function DonePage() {
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: "0.08em",
-            color: "var(--gold-700)",
+            color: "var(--accent-gold-700)",
             textTransform: "uppercase",
             marginBottom: 6,
           }}
@@ -250,12 +250,12 @@ export default function DonePage() {
                 alignItems: "start",
                 gap: 8,
                 fontSize: 13,
-                color: "var(--navy-700)",
+                color: "var(--fg-onboarding-body)",
               }}
             >
               <span
                 style={{
-                  color: "var(--emerald-600)",
+                  color: "var(--onboarding-accent)",
                   marginTop: 3,
                   flexShrink: 0,
                 }}
@@ -276,7 +276,7 @@ export default function DonePage() {
           style={{
             marginTop: 16,
             fontSize: 13,
-            color: "var(--rose-600)",
+            color: "var(--color-danger-fg)",
             maxWidth: 320,
           }}
         >
@@ -296,14 +296,14 @@ export default function DonePage() {
           width: "100%",
           maxWidth: 320,
           padding: "16px 22px",
-          background: saving ? "var(--emerald-700)" : "var(--emerald-600)",
-          color: "white",
+          background: saving ? "var(--onboarding-accent-strong)" : "var(--onboarding-accent)",
+          color: "var(--fg-on-dark)",
           border: "none",
           borderRadius: 14,
           fontSize: 15,
           fontWeight: 600,
           fontFamily: "inherit",
-          boxShadow: "0 8px 20px -6px rgba(15, 110, 86, 0.4)",
+          boxShadow: "var(--onboarding-accent-shadow)",
           cursor: saving ? "wait" : "pointer",
           marginTop: 28,
           minHeight: 44,

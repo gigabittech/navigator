@@ -105,20 +105,42 @@ CREATE TABLE IF NOT EXISTS log_events (
     'SideEffectObserved',
     'SleepQualityLogged',
     'AppetiteLogged'
-  ]))
+  ])),
+  -- Per-child sequence_num must be unique: the counter is assigned via a
+  -- max()+1 subquery at INSERT time, so a collision (e.g. two near-concurrent
+  -- writes reading the same max) fails loudly and the writer retries rather
+  -- than silently duplicating a sequence. Mirrors server migration 0005.
+  -- NULLs are distinct under UNIQUE, so unpopulated rows don't collide.
+  CONSTRAINT log_events_child_seq_unique UNIQUE (child_id, sequence_num)
 );
 
 CREATE INDEX IF NOT EXISTS log_events_child_occurred_idx ON log_events(child_id, occurred_at DESC);
 CREATE INDEX IF NOT EXISTS log_events_child_seq_idx ON log_events(child_id, sequence_num);
 CREATE INDEX IF NOT EXISTS log_events_type_idx ON log_events(event_type);
 
--- Append-only enforcement: UPDATE/DELETE are silently swallowed. Application
--- code never tries — to "edit" a past event, emit a *Corrected event.
-CREATE OR REPLACE RULE no_update_log_events AS
-  ON UPDATE TO log_events DO INSTEAD NOTHING;
+-- Append-only enforcement: UPDATE/DELETE FAIL LOUDLY (CLAUDE.md). Application
+-- code never tries — to "edit" a past event, emit a *Corrected event. This
+-- mirrors server migration 0004; the original silent DO-INSTEAD-NOTHING rules
+-- discarded writes without raising, which hid bugs.
+CREATE OR REPLACE FUNCTION log_events_append_only() RETURNS TRIGGER AS $$
+BEGIN
+  RAISE EXCEPTION
+    'log_events is append-only: % is not allowed. Emit a *Corrected event instead.',
+    TG_OP
+    USING ERRCODE = 'restrict_violation';
+END;
+$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE RULE no_delete_log_events AS
-  ON DELETE TO log_events DO INSTEAD NOTHING;
+DROP TRIGGER IF EXISTS log_events_no_update ON log_events;
+DROP TRIGGER IF EXISTS log_events_no_delete ON log_events;
+
+CREATE TRIGGER log_events_no_update
+  BEFORE UPDATE ON log_events
+  FOR EACH ROW EXECUTE FUNCTION log_events_append_only();
+
+CREATE TRIGGER log_events_no_delete
+  BEFORE DELETE ON log_events
+  FOR EACH ROW EXECUTE FUNCTION log_events_append_only();
 
 -- appointments ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS appointments (

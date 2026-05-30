@@ -129,39 +129,43 @@ describe("log_events append-only rules", () => {
     db = await createTestDb();
   });
 
-  it("silently ignores UPDATE attempts (DO INSTEAD NOTHING rule)", async () => {
+  it("raises on UPDATE attempts (append-only trigger fails loudly)", async () => {
     const id = await insertTestEvent(db, {
       eventType: "MedicationDoseTaken",
       payload: { medication_id: DEMO_MED_ID, scheduled_for: "2026-01-01T07:00:00Z", dose_mg: 10 },
     });
 
-    // This UPDATE should be swallowed by the rewrite rule — no error, no change.
-    await db.query(
-      `UPDATE log_events SET event_type = 'MedicationDoseMissed' WHERE id = $1`,
-      [id],
-    );
+    // The append-only trigger must RAISE rather than silently swallow the write.
+    await expect(
+      db.query(
+        `UPDATE log_events SET event_type = 'MedicationDoseMissed' WHERE id = $1`,
+        [id],
+      ),
+    ).rejects.toThrow(/append-only/);
 
     const res = await db.query<{ event_type: string }>(
       `SELECT event_type FROM log_events WHERE id = $1`,
       [id],
     );
-    // Row still exists with original event_type
+    // Row is unchanged — the UPDATE was rejected.
     expect(res.rows[0]!.event_type).toBe("MedicationDoseTaken");
   });
 
-  it("silently ignores DELETE attempts (DO INSTEAD NOTHING rule)", async () => {
+  it("raises on DELETE attempts (append-only trigger fails loudly)", async () => {
     const id = await insertTestEvent(db, {
       eventType: "MedicationDoseTaken",
       payload: { medication_id: DEMO_MED_ID, scheduled_for: "2026-01-01T07:00:00Z", dose_mg: 10 },
     });
 
-    await db.query(`DELETE FROM log_events WHERE id = $1`, [id]);
+    await expect(
+      db.query(`DELETE FROM log_events WHERE id = $1`, [id]),
+    ).rejects.toThrow(/append-only/);
 
     const res = await db.query<{ count: string }>(
       `SELECT count(*) AS count FROM log_events WHERE id = $1`,
       [id],
     );
-    // Row still exists — DELETE was silently swallowed
+    // Row still exists — the DELETE was rejected.
     expect(Number(res.rows[0]!.count)).toBe(1);
   });
 });

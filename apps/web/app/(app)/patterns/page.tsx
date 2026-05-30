@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Card, Pill } from "@navigator/design-system/components";
 import { usePatterns } from "@/lib/db/queries/usePatterns";
+import { useChild } from "@/lib/db/queries/useChild";
 
 /**
  * /patterns — three data-driven charts derived entirely from the local PGlite
@@ -14,8 +15,9 @@ import { usePatterns } from "@/lib/db/queries/usePatterns";
  *   3. Trigger clusters — most-tagged observations (last 30 days)
  */
 export default function PatternsPage() {
+  const child = useChild();
   const { wearOffBuckets, adherenceWeeks, adherencePct, triggers, loading, hasData } =
-    usePatterns();
+    usePatterns(child?.id);
 
   if (loading) {
     return (
@@ -113,7 +115,7 @@ function WearOffChart({ buckets }: WearOffChartProps) {
                   right: 0,
                   bottom: 0,
                   height: `${Math.max(value * 100, 4)}%`,
-                  background: isWarn ? "var(--amber-500)" : "var(--emerald-500)",
+                  background: isWarn ? "var(--color-warning-dot)" : "var(--color-success-dot)",
                   borderRadius: "4px 4px 2px 2px",
                   transition: "height 300ms var(--ease-out)",
                 }}
@@ -202,8 +204,8 @@ function AdherenceChart({ weeks, pct }: AdherenceChartProps) {
       >
         <defs>
           <linearGradient id="adherence-gradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="var(--emerald-600)" stopOpacity="0.20" />
-            <stop offset="100%" stopColor="var(--emerald-600)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--color-success-fg)" stopOpacity="0.20" />
+            <stop offset="100%" stopColor="var(--color-success-fg)" stopOpacity="0" />
           </linearGradient>
         </defs>
         {fillPath ? (
@@ -213,14 +215,14 @@ function AdherenceChart({ weeks, pct }: AdherenceChartProps) {
           <path
             d={linePath}
             fill="none"
-            stroke="var(--emerald-600)"
+            stroke="var(--color-success-fg)"
             strokeWidth="2.4"
             strokeLinejoin="round"
             strokeLinecap="round"
           />
         ) : null}
         {lastPoint ? (
-          <circle cx={lastPoint.x} cy={lastPoint.y} r="4" fill="var(--emerald-600)" />
+          <circle cx={lastPoint.x} cy={lastPoint.y} r="4" fill="var(--color-success-fg)" />
         ) : null}
       </svg>
     </Card>
@@ -242,12 +244,12 @@ function TriggerClustersChart({ triggers }: TriggerClustersChartProps) {
       <div className="flex items-start justify-between mb-3">
         <div>
           <p className="text-sm font-semibold text-fg-1">Trigger clusters</p>
-          <p className="text-xs text-fg-3 mt-0.5">Top tags · last 7 days</p>
+          <p className="text-xs text-fg-3 mt-0.5">Top tags · last 30 days</p>
         </div>
       </div>
 
       {isEmpty ? (
-        <p className="text-sm text-fg-3">No observations recorded this month.</p>
+        <p className="text-sm text-fg-3">No observations recorded in the last 30 days.</p>
       ) : (
         <div
           role="list"
@@ -289,8 +291,8 @@ function TriggerClustersChart({ triggers }: TriggerClustersChartProps) {
                         width: `${Math.max(pct * 100, 4)}%`,
                         height: "100%",
                         background: isWarn
-                          ? "var(--amber-500)"
-                          : "var(--emerald-500)",
+                          ? "var(--color-warning-dot)"
+                          : "var(--color-success-dot)",
                         borderRadius: 3,
                         transition: "width 300ms var(--ease-out)",
                       }}

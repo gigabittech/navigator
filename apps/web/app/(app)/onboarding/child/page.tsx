@@ -57,26 +57,26 @@ export default function AddChildPage() {
   }
 
   const inputStyle: React.CSSProperties = {
-    background: "white",
-    border: "1px solid rgba(14, 27, 48, 0.10)",
+    background: "var(--surface-onboarding-card)",
+    border: "1px solid var(--border-onboarding)",
     borderRadius: 12,
     padding: "14px 16px",
     fontSize: 16,
     fontFamily: "inherit",
-    color: "var(--navy-800)",
+    color: "var(--fg-onboarding-title)",
     outline: "none",
     width: "100%",
     boxSizing: "border-box",
   };
 
   // Focus style is handled by the global :focus-visible rule in tokens.css.
-  // onFocus/onBlur add the emerald ring inline so it works without Tailwind JIT.
+  // onFocus/onBlur add the accent ring inline so it works without Tailwind JIT.
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.borderColor = "var(--emerald-500)";
-    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(15, 110, 86, 0.10)";
+    e.currentTarget.style.borderColor = "var(--onboarding-accent)";
+    e.currentTarget.style.boxShadow = "0 0 0 3px var(--onboarding-accent-ring)";
   };
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.borderColor = "rgba(14, 27, 48, 0.10)";
+    e.currentTarget.style.borderColor = "var(--border-onboarding)";
     e.currentTarget.style.boxShadow = "none";
   };
 
@@ -102,7 +102,7 @@ export default function AddChildPage() {
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--navy-400)",
+              color: "var(--fg-onboarding-muted)",
             }}
           >
             Step 1 of 4
@@ -115,7 +115,7 @@ export default function AddChildPage() {
               lineHeight: 1.1,
               marginTop: 2,
               marginBottom: 0,
-              color: "var(--navy-800)",
+              color: "var(--fg-onboarding-title)",
             }}
           >
             Who is this for?
@@ -124,7 +124,7 @@ export default function AddChildPage() {
             style={{
               marginTop: 8,
               fontSize: 14,
-              color: "var(--navy-500)",
+              color: "var(--fg-onboarding-body)",
               lineHeight: 1.5,
             }}
           >
@@ -141,7 +141,7 @@ export default function AddChildPage() {
               fontWeight: 700,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "var(--navy-400)",
+              color: "var(--fg-onboarding-muted)",
             }}
           >
             First name
@@ -168,7 +168,7 @@ export default function AddChildPage() {
               role="alert"
               style={{
                 fontSize: 12,
-                color: "var(--rose-600)",
+                color: "var(--color-danger-fg)",
                 margin: 0,
               }}
             >
@@ -193,7 +193,7 @@ export default function AddChildPage() {
                 fontWeight: 700,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                color: "var(--navy-400)",
+                color: "var(--fg-onboarding-muted)",
               }}
             >
               Age
@@ -223,7 +223,7 @@ export default function AddChildPage() {
                 fontWeight: 700,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                color: "var(--navy-400)",
+                color: "var(--fg-onboarding-muted)",
               }}
             >
               Pronouns
@@ -252,7 +252,7 @@ export default function AddChildPage() {
               fontWeight: 700,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "var(--navy-400)",
+              color: "var(--fg-onboarding-muted)",
             }}
           >
             Diagnoses (optional)
@@ -280,11 +280,13 @@ export default function AddChildPage() {
                     fontWeight: 600,
                     padding: "8px 14px",
                     borderRadius: 9999,
-                    background: selected ? "var(--navy-800)" : "white",
+                    background: selected
+                      ? "var(--fg-onboarding-title)"
+                      : "var(--surface-onboarding-card)",
                     border: selected
-                      ? "1px solid var(--navy-800)"
-                      : "1px solid rgba(14, 27, 48, 0.10)",
-                    color: selected ? "var(--cream-50)" : "var(--navy-600)",
+                      ? "1px solid var(--fg-onboarding-title)"
+                      : "1px solid var(--border-onboarding)",
+                    color: selected ? "var(--fg-on-dark)" : "var(--fg-onboarding-muted)",
                     cursor: "pointer",
                     fontFamily: "inherit",
                     minHeight: 44,
@@ -301,7 +303,7 @@ export default function AddChildPage() {
         <p
           style={{
             fontSize: 12,
-            color: "var(--navy-400)",
+            color: "var(--fg-onboarding-muted)",
             lineHeight: 1.5,
             marginTop: 8,
           }}
@@ -320,14 +322,14 @@ export default function AddChildPage() {
             gap: 8,
             width: "100%",
             padding: "16px 22px",
-            background: "var(--emerald-600)",
-            color: "white",
+            background: "var(--onboarding-accent)",
+            color: "var(--fg-on-dark)",
             border: "none",
             borderRadius: 14,
             fontSize: 15,
             fontWeight: 600,
             fontFamily: "inherit",
-            boxShadow: "0 8px 20px -6px rgba(15, 110, 86, 0.4)",
+            boxShadow: "var(--onboarding-accent-shadow)",
             cursor: "pointer",
             marginTop: 24,
             minHeight: 44,

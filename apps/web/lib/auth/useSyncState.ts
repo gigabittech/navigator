@@ -19,9 +19,9 @@ import { useAuthUser } from "./useAuthUser";
 export type SyncState = "synced" | "syncing" | "error" | "offline";
 
 export function useSyncState(): SyncState {
-  // useAuthUser is no-op when Supabase is not configured.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _user = useAuthUser();
+  // Subscribe to auth changes so sync state recomputes on sign-in/out.
+  // (No-op when Supabase is not configured.) The value itself is unused here.
+  useAuthUser();
 
   const [online, setOnline] = useState<boolean>(
     typeof navigator !== "undefined" ? navigator.onLine : true,
