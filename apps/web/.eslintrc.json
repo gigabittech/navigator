@@ -1,6 +1,71 @@
 {
   "extends": "next/core-web-vitals",
   "rules": {
-    "react/no-unescaped-entities": "off"
-  }
+    "react/no-unescaped-entities": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Literal[value=/^(?!.*var\\()(?=.*#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\b)/]",
+        "message": "no-raw-hex: do not hard-code hex colors. Use a design token from packages/design-system/src/tokens.css (e.g. var(--surface-card)) or a Tailwind preset utility (bg-surface-card). A token-with-fallback like var(--token, #hex) is allowed; a bare #hex is not."
+      },
+      {
+        "selector": "TemplateElement[value.raw=/^(?!.*var\\()(?=.*#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\b)/]",
+        "message": "no-raw-hex: do not hard-code hex colors. Use a design token from packages/design-system/src/tokens.css (e.g. var(--surface-card)) or a Tailwind preset utility (bg-surface-card). A token-with-fallback like var(--token, #hex) is allowed; a bare #hex is not."
+      },
+      {
+        "selector": "Literal[value=/(?:^|[\\s\"'`])(?:bg|text|border|ring|from|to|via)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]/]",
+        "message": "no-bare-palette: do not use raw Tailwind palette utilities (e.g. bg-indigo-600). Use a semantic design-system utility mapped via the Tailwind preset (bg-accent-600, text-fg-2, bg-surface-card)."
+      },
+      {
+        "selector": "TemplateElement[value.raw=/(?:^|[\\s\"'`])(?:bg|text|border|ring|from|to|via)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]/]",
+        "message": "no-bare-palette: do not use raw Tailwind palette utilities (e.g. bg-indigo-600). Use a semantic design-system utility mapped via the Tailwind preset (bg-accent-600, text-fg-2, bg-surface-card)."
+      },
+      {
+        "selector": "JSXText[value=/[!\\u2600-\\u27bf\\u2b00-\\u2bff\\ud83c\\ud83d\\ud83e\\ufe0f]/]",
+        "message": "voice: product UI copy uses sentence case, second person, no exclamation marks, and no emoji (see CLAUDE.md — Voice & tone). Rewrite the string without '!' or emoji."
+      },
+      {
+        "selector": "JSXAttribute[name.name=/^(title|placeholder|aria-label)$/] Literal[value=/[!\\u2600-\\u27bf\\u2b00-\\u2bff\\ud83c\\ud83d\\ud83e\\ufe0f]/]",
+        "message": "voice: user-facing attribute copy (title/placeholder/aria-label) uses sentence case, second person, no exclamation marks, and no emoji (see CLAUDE.md — Voice & tone)."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["app/layout.tsx", "lib/pdf/reportPdf.tsx"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value=/(?:^|[\\s\"'`])(?:bg|text|border|ring|from|to|via)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]/]",
+            "message": "no-bare-palette: do not use raw Tailwind palette utilities. Use a semantic design-system utility mapped via the Tailwind preset."
+          },
+          {
+            "selector": "TemplateElement[value.raw=/(?:^|[\\s\"'`])(?:bg|text|border|ring|from|to|via)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]/]",
+            "message": "no-bare-palette: do not use raw Tailwind palette utilities. Use a semantic design-system utility mapped via the Tailwind preset."
+          },
+          {
+            "selector": "JSXText[value=/[!\\u2600-\\u27bf\\u2b00-\\u2bff\\ud83c\\ud83d\\ud83e\\ufe0f]/]",
+            "message": "voice: product UI copy uses sentence case, second person, no exclamation marks, and no emoji (see CLAUDE.md — Voice & tone)."
+          },
+          {
+            "selector": "JSXAttribute[name.name=/^(title|placeholder|aria-label)$/] Literal[value=/[!\\u2600-\\u27bf\\u2b00-\\u2bff\\ud83c\\ud83d\\ud83e\\ufe0f]/]",
+            "message": "voice: user-facing attribute copy (title/placeholder/aria-label) uses sentence case, second person, no exclamation marks, and no emoji (see CLAUDE.md — Voice & tone)."
+          }
+        ]
+      }
+    },
+    {
+      "files": ["app/(marketing)/waitlist/_actions.ts"],
+      "rules": {
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "Literal[value=/(?:^|[\\s\"'`])(?:bg|text|border|ring|from|to|via)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]/]",
+            "message": "no-bare-palette: do not use raw Tailwind palette utilities. Use a semantic design-system utility mapped via the Tailwind preset."
+          }
+        ]
+      }
+    }
+  ]
 }
