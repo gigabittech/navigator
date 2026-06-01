@@ -21,7 +21,9 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 echo "▶ Running migrations..."
-psql "$DATABASE_URL" -f "$REPO_ROOT/db/migrations/0001_init.sql"
-psql "$DATABASE_URL" -f "$REPO_ROOT/db/migrations/0002_rls_policies.sql"
+for migration in "$REPO_ROOT"/db/migrations/*.sql; do
+  echo "  → $(basename "$migration")"
+  psql "$DATABASE_URL" -f "$migration"
+done
 
 echo "✅ Migrations complete"

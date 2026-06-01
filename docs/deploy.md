@@ -85,7 +85,12 @@ export DATABASE_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.c
 ```
 
 This runs `db/migrations/0001_init.sql` then `db/migrations/0002_rls_policies.sql`
-in order.
+and every later migration in lexical order, including `0003_waitlist.sql`.
+
+If waitlist submissions log `PGRST205` with
+`Could not find the table 'public.waitlist_entries'`, the production database
+has not received the waitlist migration yet. Re-run `./scripts/run-migrations.sh`
+with `DATABASE_URL` pointed at the same Supabase project used by the deployed app.
 
 ### 4. Link the Supabase CLI
 
@@ -222,6 +227,7 @@ supabase stop
 |---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | For auth + sync | Supabase Dashboard → Settings → API | Leave blank for local-only mode |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For auth + sync | Supabase Dashboard → Settings → API | Safe to expose to browser |
+| `SUPABASE_SERVICE_ROLE_KEY` | For waitlist writes | Supabase Dashboard → Settings → API | Server-side only; never expose to browser |
 | `NEXT_PUBLIC_ELECTRIC_URL` | No (deferred) | Electric dashboard | Not wired in MVP; leave blank |
 | `RESEND_API_KEY` | No | Resend Dashboard | Waitlist emails; also used as Supabase SMTP pass |
 | `RESEND_FROM` | No | Your choice | Sender identity for waitlist emails |

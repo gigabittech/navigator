@@ -6,7 +6,8 @@ Database lives in Supabase Postgres. This folder has:
 db/
 ├── migrations/        SQL migrations, run in lexical order
 │   ├── 0001_init.sql       schema (tables, indexes, append-only rules)
-│   └── 0002_rls_policies.sql   RLS — required for every table
+│   ├── 0002_rls_policies.sql   RLS — required for app tables
+│   └── 0003_waitlist.sql       server-only public waitlist table
 ├── drizzle.config.ts  Drizzle Kit config (schema lives in packages/schema)
 ├── migrate.ts         migration runner (postgres-js)
 └── seed.ts            dev seed
