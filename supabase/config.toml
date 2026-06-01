@@ -64,3 +64,10 @@ verify_jwt = true
 
 [functions.transcribe_voice]
 verify_jwt = true
+
+# Scheduler-invoked (not browser): authorized by a shared x-cron-secret header,
+# so JWT verification is off. Sends dose reminders via Web Push.
+# Secrets:  supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... \
+#             VAPID_SUBJECT=mailto:alerts@navigator.app CRON_SECRET=...
+[functions.send_reminders]
+verify_jwt = false

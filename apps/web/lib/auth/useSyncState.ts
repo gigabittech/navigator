@@ -4,17 +4,17 @@
  * Reactive hook that returns the current sync state for the SyncDot indicator.
  *
  * State logic:
- *   "offline"  — device has no network connection
- *   "synced"   — local-only mode (data is saved on device) OR logged in + online
- *                (sync is deferred but data is safe)
- *
- * The "syncing" and "error" states are reserved for when the ElectricSQL sync
- * layer is wired in. They are not produced here yet.
+ *   "offline"  — device has no network connection (takes precedence: the user
+ *                must know writes are local-only).
+ *   "syncing"  — the Electric sync layer is starting / streaming shapes.
+ *   "error"    — sync hit a problem. Data is still safe locally; the dot warns.
+ *   "synced"   — local-only mode, OR signed-in + online with sync live/idle.
  */
 
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured } from "@/lib/config";
 import { useAuthUser } from "./useAuthUser";
+import { useSyncPhase } from "@/lib/sync/store";
 
 export type SyncState = "synced" | "syncing" | "error" | "offline";
 
@@ -22,6 +22,7 @@ export function useSyncState(): SyncState {
   // Subscribe to auth changes so sync state recomputes on sign-in/out.
   // (No-op when Supabase is not configured.) The value itself is unused here.
   useAuthUser();
+  const phase = useSyncPhase();
 
   const [online, setOnline] = useState<boolean>(
     typeof navigator !== "undefined" ? navigator.onLine : true,
@@ -38,11 +39,14 @@ export function useSyncState(): SyncState {
     };
   }, []);
 
+  // Offline always wins — the user must know writes aren't leaving the device.
   if (!online) return "offline";
 
-  // In local-only mode data is safely persisted to IndexedDB — treat as saved.
-  // When logged in + online, sync is deferred but data is not at risk.
+  // Local-only mode: data is safely persisted to IndexedDB.
   if (!isSupabaseConfigured()) return "synced";
 
+  // Signed in + online: reflect the live sync phase.
+  if (phase === "starting") return "syncing";
+  if (phase === "error") return "error";
   return "synced";
 }

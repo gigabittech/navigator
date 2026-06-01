@@ -14,6 +14,7 @@ import { createBrowserClient } from "@/lib/auth/supabase";
 import { useAuthUser } from "@/lib/auth/useAuthUser";
 import { MedicationForm } from "./_components/MedicationForm";
 import { CoParents } from "./_components/CoParents";
+import { Reminders } from "./_components/Reminders";
 
 export default function SettingsPage() {
   const db = usePGlite();
@@ -103,6 +104,8 @@ export default function SettingsPage() {
       </section>
 
       <CoParents childId={child?.id} />
+
+      <Reminders childId={child?.id} />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-semibold text-fg-2">Appearance</h2>

@@ -171,6 +171,23 @@ CREATE TABLE IF NOT EXISTS reports (
 
 CREATE INDEX IF NOT EXISTS reports_child_generated_idx ON reports(child_id, generated_at DESC);
 
+-- push_subscriptions -------------------------------------------------------
+-- Mirrors the server table (db/migrations/0009). Local-first: the reminder
+-- toggle reads/writes here; sync carries the rows to the server, which the
+-- send_reminders function reads. No RLS on device (single user's own rows).
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  child_id    UUID NOT NULL REFERENCES children(id) ON DELETE CASCADE,
+  client_id   TEXT NOT NULL,
+  endpoint    TEXT NOT NULL UNIQUE,
+  p256dh      TEXT NOT NULL,
+  auth        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS push_subs_child_idx ON push_subscriptions(child_id);
+
 -- updated_at trigger -------------------------------------------------------
 CREATE OR REPLACE FUNCTION set_updated_at() RETURNS TRIGGER AS $$
 BEGIN

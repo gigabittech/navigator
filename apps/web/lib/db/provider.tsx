@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { PGliteProvider } from "@electric-sql/pglite-react";
 import type { PGliteWithLive } from "@electric-sql/pglite/live";
 import { getDb } from "./client.js";
+import { SyncManager } from "../sync/SyncManager.js";
 
 type BootState =
   | { status: "loading" }
@@ -56,7 +57,12 @@ export function DbProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  return <PGliteProvider db={boot.db}>{children}</PGliteProvider>;
+  return (
+    <PGliteProvider db={boot.db}>
+      <SyncManager />
+      {children}
+    </PGliteProvider>
+  );
 }
 
 /**

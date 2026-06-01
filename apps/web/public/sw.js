@@ -61,6 +61,46 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// ── Push notifications ──────────────────────────────────────────────────────
+// Dose reminders are sent by a server function (supabase/functions/send_reminders)
+// to subscriptions stored per device. The payload is JSON:
+//   { title, body, url?, tag? }
+// Voice-compliant copy is set by the server; the SW just renders it.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "Navigator", body: event.data ? event.data.text() : "" };
+  }
+  const title = data.title || "Navigator";
+  const options = {
+    body: data.body || "",
+    tag: data.tag || "navigator-reminder",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    data: { url: data.url || "/today" },
+    // Reminders shouldn't stack silently; renotify replaces a prior one.
+    renotify: Boolean(data.tag),
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Focus an existing tab if one is open, else open the target route.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || "/today";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(target) && "focus" in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target);
+      return undefined;
+    }),
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
