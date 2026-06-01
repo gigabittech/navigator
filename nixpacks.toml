@@ -1,5 +1,5 @@
 [phases.install]
-cmds = ["corepack enable", "pnpm install --frozen-lockfile"]
+cmds = ["corepack enable", "pnpm install --frozen-lockfile --prod=false"]
 
 [phases.build]
 cmds = ["pnpm --filter @navigator/web build"]

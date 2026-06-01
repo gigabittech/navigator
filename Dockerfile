@@ -11,7 +11,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --prod=false
 RUN pnpm --filter @navigator/web build
 
 FROM node:20-bookworm-slim AS runner
