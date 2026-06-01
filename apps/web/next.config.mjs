@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const isProd = process.env.NODE_ENV === "production";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // The Supabase project URL (auth, Edge Functions, sync) must be reachable from
 // the browser, so it has to be allow-listed in connect-src. It's the only
@@ -85,6 +88,7 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: "standalone",
   // Cross-origin isolation headers required for SharedArrayBuffer (PGlite WASM).
   // PWA install also benefits from this. Plus a strong CSP + standard security
   // headers — see securityHeaders above.
@@ -100,6 +104,7 @@ const nextConfig = {
     // Allow importing TS source files from workspace packages directly,
     // so we don't need a separate build step for design-system / schema.
     externalDir: true,
+    outputFileTracingRoot: join(__dirname, "../.."),
   },
   transpilePackages: [
     "@navigator/design-system",
