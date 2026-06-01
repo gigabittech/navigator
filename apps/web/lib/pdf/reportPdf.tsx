@@ -18,7 +18,11 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 18, fontFamily: "Helvetica-Bold" },
   statLabel: { fontSize: 9, color: "#64748B", marginTop: 2 },
   section: { marginTop: 18 },
-  sectionTitle: { fontSize: 13, fontFamily: "Helvetica-Bold", marginBottom: 4 },
+  sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 },
+  sectionTitle: { fontSize: 13, fontFamily: "Helvetica-Bold" },
+  sectionStat: { fontSize: 10, fontFamily: "Helvetica-Bold" },
+  statPositive: { color: "#15803D" },
+  statFlag: { color: "#B45309" },
   body: { fontSize: 11, color: "#334155" },
   divider: { borderBottomWidth: 1, borderBottomColor: "#E2E8F0", marginTop: 8 },
   footer: { position: "absolute", bottom: 28, left: 40, right: 40, fontSize: 8, color: "#94A3B8" },
@@ -62,7 +66,20 @@ function ReportDocument({ report }: { report: Report }) {
 
         {report.sections.map((s) => (
           <View key={s.id} style={styles.section}>
-            <Text style={styles.sectionTitle}>{s.title}</Text>
+            <View style={styles.sectionHead}>
+              <Text style={styles.sectionTitle}>{s.title}</Text>
+              {s.stat ? (
+                <Text
+                  style={[
+                    styles.sectionStat,
+                    s.stat.direction === "positive" ? styles.statPositive : styles.statFlag,
+                  ]}
+                >
+                  {/* Paired label so the signal is never color-alone (a11y). */}
+                  {s.stat.value} · {s.stat.direction === "positive" ? "on track" : "review"}
+                </Text>
+              ) : null}
+            </View>
             <Text style={styles.body}>{s.body}</Text>
           </View>
         ))}

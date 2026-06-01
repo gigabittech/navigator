@@ -9,6 +9,7 @@ import {
   TranscribeUnavailableError,
 } from "@/lib/ai/transcribe";
 import { logVoiceEntry } from "@/lib/db/mutations/logVoiceEntry";
+import { getContext } from "@/lib/db/mutations/context";
 
 type State = "idle" | "recording" | "working";
 
@@ -39,7 +40,8 @@ export function VoiceNote() {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const seconds = Math.round((Date.now() - startedAtRef.current) / 1000);
         try {
-          const transcript = await transcribeAudio(blob);
+          const { childId } = await getContext(db);
+          const transcript = await transcribeAudio(blob, childId);
           if (transcript) {
             await logVoiceEntry(db, {
               transcript,

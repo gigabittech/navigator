@@ -5,6 +5,7 @@ import { usePGlite } from "@electric-sql/pglite-react";
 import { ArrowLeft, Mic } from "lucide-react";
 import { isTranscribeAvailable, transcribeAudio, TranscribeUnavailableError } from "@/lib/ai/transcribe";
 import { logVoiceEntry } from "@/lib/db/mutations/logVoiceEntry";
+import { getContext } from "@/lib/db/mutations/context";
 
 // ─── Keyword → semantic tag mapping ──────────────────────────────────────────
 
@@ -163,7 +164,8 @@ export function VoiceRecorder({ onClose }: VoiceRecorderProps) {
         );
 
         try {
-          const text = await transcribeAudio(blob);
+          const { childId } = await getContext(db);
+          const text = await transcribeAudio(blob, childId);
           if (text) {
             setTranscript(text);
             await logVoiceEntry(db, {

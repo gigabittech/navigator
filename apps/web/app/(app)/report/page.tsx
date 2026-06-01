@@ -311,11 +311,11 @@ export default function ReportPage() {
   }
 
   async function addNarrative() {
-    if (!report) return;
+    if (!report || !child) return;
     setNarrating(true);
     setNote(null);
     try {
-      const narrative = await generateNarrative(report);
+      const narrative = await generateNarrative(report, child.id);
       setReport({ ...report, narrative });
     } catch (err) {
       setNote(

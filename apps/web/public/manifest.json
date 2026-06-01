@@ -46,5 +46,21 @@
         }
       ]
     }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/narrow-home.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Walk into every appointment prepared."
+    },
+    {
+      "src": "/screenshots/wide-home.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Track medications, observations, and a one-tap clinical report."
+    }
   ]
 }
