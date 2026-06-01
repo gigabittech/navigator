@@ -1,0 +1,45 @@
+{
+  "name": "navigator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local-first PWA for parents managing a child's complex psychiatric care.",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@navigator/web",
+    "build": "turbo run build",
+    "start": "turbo run start --filter=@navigator/web",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "pnpm --filter=@navigator/web test:e2e",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "ds:dev": "pnpm --filter=@navigator/design-system dev",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:migrate": "pnpm --filter=@navigator/schema migrate",
+    "db:generate": "pnpm --filter=@navigator/schema generate",
+    "db:seed": "pnpm --filter=@navigator/schema seed",
+    "db:studio": "pnpm --filter=@navigator/schema studio"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "turbo": "^2.1.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.18.0"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "printWidth": 100,
+    "tabWidth": 2
+  }
+}

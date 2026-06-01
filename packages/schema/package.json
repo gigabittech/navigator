@@ -1,0 +1,44 @@
+{
+  "name": "@navigator/schema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./event-types": {
+      "types": "./src/event-types.ts",
+      "import": "./src/event-types.ts"
+    },
+    "./projections": {
+      "types": "./src/projections.ts",
+      "import": "./src/projections.ts"
+    }
+  },
+  "files": ["src"],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings=0",
+    "test": "vitest run",
+    "generate": "drizzle-kit generate --config=../../db/drizzle.config.ts",
+    "migrate": "tsx ../../db/migrate.ts",
+    "studio": "drizzle-kit studio --config=../../db/drizzle.config.ts",
+    "seed": "tsx ../../db/seed.ts",
+    "clean": "rm -rf .turbo dist"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.36.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.6",
+    "@types/node": "^20.14.0",
+    "drizzle-kit": "^0.28.0",
+    "postgres": "^3.4.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.9"
+  }
+}

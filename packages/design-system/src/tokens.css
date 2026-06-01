@@ -1,0 +1,522 @@
+/* ============================================================
+   Navigator Design System — Colors & Type · v2
+   Light default · dark via [data-theme="dark"]
+   Mobile-first PWA + responsive web for parents managing
+   complex psychiatric care.
+   ============================================================ */
+
+/* --- Inter (variable) + JetBrains Mono — local files ----------------------
+   To use this stylesheet from a different folder depth, override --fonts-base
+   on :root, e.g. <html style="--fonts-base: /assets/fonts">. */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/InterVariable.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/InterVariable-Italic.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/JetBrainsMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/JetBrainsMono-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/JetBrainsMono-Italic.woff2") format("woff2");
+}
+
+/* ============================================================
+   RAW PALETTE — never reference these directly in components.
+   Use the semantic tokens at the bottom of :root instead.
+   ============================================================ */
+:root {
+  /* — Indigo (primary accent — calmer than the old bright blue) — */
+  --indigo-50:  #EEF2FF;
+  --indigo-100: #E0E7FF;
+  --indigo-200: #C7D2FE;
+  --indigo-300: #A5B4FC;
+  --indigo-400: #818CF8;
+  --indigo-500: #6366F1;
+  --indigo-600: #4F46E5;   /* light-theme primary CTA */
+  --indigo-700: #4338CA;
+  --indigo-800: #3730A3;
+  --indigo-900: #312E81;
+
+  /* — Slate (neutrals — warmer & calmer than pure navy) — */
+  --slate-50:  #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-150: #ECEFF4;    /* extra step for light-theme card alt */
+  --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1;
+  --slate-400: #94A3B8;
+  --slate-500: #64748B;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1E293B;
+  --slate-850: #161E2E;    /* between 800 and 900 for dark elevation */
+  --slate-900: #0F172A;
+  --slate-950: #020617;
+
+  /* — Warm off-white (light-theme page bg, slightly creamy) — */
+  --warm-50:  #FAFAF7;
+  --warm-100: #F5F4EF;
+
+  /* — Emerald (success / sync OK — more clinical than v1 lime) — */
+  --emerald-300: #6EE7B7;
+  --emerald-400: #34D399;
+  --emerald-500: #10B981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+
+  /* — Amber (warning — late / approaching wear-off) — */
+  --amber-300: #FCD34D;
+  --amber-400: #FBBF24;
+  --amber-500: #F59E0B;
+  --amber-600: #D97706;
+
+  /* — Rose (danger — less alarming than pure red) — */
+  --rose-300:  #FDA4AF;
+  --rose-400:  #FB7185;
+  --rose-500:  #F43F5E;
+  --rose-600:  #E11D48;
+
+  /* — Sky (info / informational notes) — */
+  --sky-300: #7DD3FC;
+  --sky-400: #38BDF8;
+  --sky-500: #0EA5E9;
+  --sky-600: #0284C7;
+
+  /* — Gold (brand warmth accent — used on dark surfaces & report seals) — */
+  --gold-400: #D6BC78;
+  --gold-500: #C9A84C;
+  --gold-600: #B8860B;
+  --gold-700: #97700C;
+
+  /* — Ink (deep navy used for dark chrome surfaces) — */
+  --ink-700: #1A3050;
+  --ink-800: #0E1B30;
+  --ink-900: #060D1A;
+
+  /* ============================================================
+     TYPOGRAPHY — theme-agnostic
+     Inter for everything; JetBrains Mono for data only.
+     ============================================================ */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo,
+               Consolas, monospace;
+
+  /* Small/body steps stay fixed for vertical rhythm. */
+  --text-2xs: 11px;
+  --text-xs:  12px;
+  --text-sm:  13px;
+  --text-base:15px;
+  --text-md:  16px;
+  /* Larger steps scale fluidly: clamp(mobile-min, vw-preferred, desktop-max).
+     Min ≈ a sensible mobile size; max ≈ the previous fixed value so nothing
+     shrinks on desktop. These feed the tailwind-preset fontSize map, so app
+     headings (text-lg … text-6xl) inherit fluid sizing automatically. */
+  --text-lg:  clamp(17px, 1.0rem + 0.20vw, 18px);
+  --text-xl:  clamp(18px, 1.05rem + 0.45vw, 20px);
+  --text-2xl: clamp(21px, 1.20rem + 0.80vw, 24px);
+  --text-3xl: clamp(24px, 1.35rem + 1.10vw, 28px);
+  --text-4xl: clamp(28px, 1.55rem + 1.80vw, 34px);
+  --text-5xl: clamp(33px, 1.85rem + 3.00vw, 44px);
+  --text-6xl: clamp(40px, 2.20rem + 4.40vw, 56px);
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+  --weight-black:   800;
+
+  --lh-tight:   1.15;
+  --lh-snug:    1.30;
+  --lh-normal:  1.45;
+  --lh-relaxed: 1.60;
+
+  --tracking-tight:   -0.02em;
+  --tracking-snug:    -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-eyebrow: 0.10em;
+
+  /* — Spacing — */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* — Radii — */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;   /* default card */
+  --radius-xl:   18px;   /* prominent cards / sheets */
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* — Motion — */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+  --duration-fast:    120ms;
+  --duration-base:    200ms;
+  --duration-slow:    320ms;
+  --duration-confirm: 480ms;
+
+  /* — Layout — */
+  --layout-app-max: 440px;
+  --layout-marketing-max: 1200px;
+  --layout-web-sidebar:   260px;
+  --layout-web-content-max: 1400px;
+  /* Comfortable measure for long-form prose (clinical notes, report body).
+     ~70ch keeps lines in the 45–75ch readability sweet spot. */
+  --reading-max: 70ch;
+  --tap-target-min: 44px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* ============================================================
+   LIGHT THEME (default)
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  /* Surfaces */
+  --surface-page:        var(--warm-50);
+  --surface-card:        #FFFFFF;
+  --surface-card-alt:    var(--warm-100);
+  --surface-card-raised: #FFFFFF;
+  --surface-input:       #FFFFFF;
+  --surface-sunk:        var(--slate-100);
+  --surface-overlay:     rgba(15, 23, 42, 0.42);
+  --surface-tint-accent: rgba(79, 70, 229, 0.06);
+
+  /* Foreground */
+  --fg-1: var(--slate-900);
+  --fg-2: var(--slate-700);
+  --fg-3: var(--slate-500);
+  --fg-4: var(--slate-400);
+  --fg-accent:    var(--indigo-600);
+  --fg-on-accent: #FFFFFF;
+
+  /* Borders */
+  --border-subtle: rgba(15, 23, 42, 0.06);
+  --border-card:   rgba(15, 23, 42, 0.10);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --border-accent: var(--indigo-500);
+
+  /* Brand accent */
+  --color-accent-50:  var(--indigo-50);
+  --color-accent-100: var(--indigo-100);
+  --color-accent-200: var(--indigo-200);
+  --color-accent-300: var(--indigo-300);
+  --color-accent-400: var(--indigo-400);
+  --color-accent-500: var(--indigo-500);
+  --color-accent-600: var(--indigo-600);    /* primary CTA in light */
+  --color-accent-700: var(--indigo-700);
+  --color-accent-fg:  var(--indigo-600);
+  --color-accent-bg:  var(--indigo-50);
+
+  /* Semantic */
+  --color-success-fg:   var(--emerald-600);
+  --color-success-dot:  var(--emerald-500);
+  --color-success-bg:   #ECFDF5;
+  --color-success-bd:   rgba(16, 185, 129, 0.25);
+
+  --color-warning-fg:   var(--amber-600);
+  --color-warning-dot:  var(--amber-500);
+  --color-warning-bg:   #FFFBEB;
+  --color-warning-bd:   rgba(245, 158, 11, 0.30);
+
+  --color-danger-fg:    var(--rose-600);
+  --color-danger-dot:   var(--rose-500);
+  --color-danger-bg:    #FFF1F2;
+  --color-danger-bd:    rgba(244, 63, 94, 0.25);
+
+  --color-info-fg:      var(--sky-600);
+  --color-info-dot:     var(--sky-500);
+  --color-info-bg:      #F0F9FF;
+  --color-info-bd:      rgba(14, 165, 233, 0.25);
+
+  /* Shadows — subtle for light theme */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.12), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
+  --shadow-xl: 0 24px 64px -16px rgba(15, 23, 42, 0.18);
+  --shadow-glow-accent:  0 0 0 4px rgba(99, 102, 241, 0.20);
+  --shadow-glow-success: 0 0 0 4px rgba(16, 185, 129, 0.20);
+
+  /* ----------------------------------------------------------------
+     Dark chrome surfaces — used by the desktop sidebar and other
+     always-dark panels that don't flip with the light/dark theme.
+     ---------------------------------------------------------------- */
+  --surface-sidebar:        var(--ink-800);
+  --surface-sidebar-raised: rgba(252, 251, 246, 0.06);
+  --border-on-dark:         rgba(252, 251, 246, 0.10);
+  --border-on-dark-subtle:  rgba(252, 251, 246, 0.06);
+  --fg-on-dark:        #F9F8F4;
+  --fg-on-dark-muted:  rgba(252, 251, 246, 0.72);
+  --fg-on-dark-faint:  rgba(252, 251, 246, 0.50);
+  --fg-on-dark-ghost:  rgba(252, 251, 246, 0.42);
+  --surface-on-dark-active: rgba(5, 150, 105, 0.20);
+  --surface-on-dark-hover:  rgba(252, 251, 246, 0.04);
+
+  /* ----------------------------------------------------------------
+     Gold accent — brand warmth on dark hero/report surfaces.
+     ---------------------------------------------------------------- */
+  --accent-gold-500: var(--gold-500);
+  --accent-gold-600: var(--gold-600);
+  --accent-gold-700: var(--gold-700);
+  --accent-gold-on-dark: var(--gold-500);
+
+  /* Brand-mark gradient (the Navigator glyph / avatars) */
+  --gradient-brand-glyph: linear-gradient(150deg, var(--emerald-500), var(--emerald-700));
+  --gradient-brand-glyph-135: linear-gradient(135deg, var(--emerald-500), var(--emerald-700));
+  --accent-gold-bg:  rgba(201, 168, 76, 0.16);
+  --accent-gold-bd:  rgba(201, 168, 76, 0.18);
+  --accent-gold-tint: rgba(201, 168, 76, 0.10);
+  --gradient-report-banner: linear-gradient(135deg, rgba(201, 168, 76, 0.10), rgba(15, 110, 86, 0.06));
+
+  /* ----------------------------------------------------------------
+     Onboarding surfaces — a calm cream + ink palette for the
+     installable first-run flow. Semantic so the flow renders with
+     colour on every route (not only under marketing.css).
+     ---------------------------------------------------------------- */
+  --surface-onboarding:       var(--warm-100);
+  --surface-onboarding-card:  #FFFFFF;
+  --fg-onboarding-title:      var(--ink-800);
+  --fg-onboarding-body:       #2A4A6E;
+  --fg-onboarding-muted:      #3D6080;
+  --border-onboarding:        rgba(14, 27, 48, 0.10);
+  --border-onboarding-subtle: rgba(14, 27, 48, 0.06);
+  --border-onboarding-strong: rgba(14, 27, 48, 0.16);
+  --surface-onboarding-sunk:  rgba(14, 27, 48, 0.05);
+
+  /* Onboarding emerald accent (matches the brand glyph gradient) */
+  --onboarding-accent:        var(--emerald-600);
+  --onboarding-accent-strong: var(--emerald-700);
+  --onboarding-accent-tint:   rgba(15, 110, 86, 0.10);
+  --onboarding-accent-tint-soft: rgba(15, 110, 86, 0.06);
+  --onboarding-accent-ring:   rgba(15, 110, 86, 0.10);
+  --onboarding-accent-shadow: 0 8px 20px -6px rgba(15, 110, 86, 0.40);
+
+  /* ----------------------------------------------------------------
+     Success-CTA accent — the green "primary action" buttons and
+     tints shared across Today / Prep / log sheets. Semantic so the
+     same emerald glow is defined once.
+     ---------------------------------------------------------------- */
+  --cta-success:        var(--emerald-600);
+  --cta-success-strong: var(--emerald-700);
+  --cta-success-tint:   rgba(15, 110, 86, 0.10);
+  --cta-success-tint-soft: rgba(15, 110, 86, 0.06);
+  --shadow-cta-success: 0 8px 20px -6px rgba(15, 110, 86, 0.40);
+  --cta-success-bd:     rgba(15, 110, 86, 0.18);
+  --gradient-pattern-card: linear-gradient(180deg, rgba(15, 110, 86, 0.06), var(--surface-card));
+  --shadow-cta-success-lg: 0 16px 36px -8px rgba(15, 110, 86, 0.50);
+  --shadow-cta-success-float: 0 12px 28px -6px rgba(15, 110, 86, 0.50), 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-sheet: 0 -20px 60px -10px rgba(14, 27, 48, 0.18);
+  --surface-grabber: rgba(14, 27, 48, 0.18);
+}
+
+/* ============================================================
+   DARK THEME
+   ============================================================ */
+[data-theme="dark"] {
+  /* Surfaces */
+  --surface-page:        var(--slate-900);
+  --surface-card:        var(--slate-800);
+  --surface-card-alt:    var(--slate-850);
+  --surface-card-raised: var(--slate-700);
+  --surface-input:       var(--slate-850);
+  --surface-sunk:        var(--slate-950);
+  --surface-overlay:     rgba(2, 6, 23, 0.72);
+  --surface-tint-accent: rgba(99, 102, 241, 0.10);
+
+  /* Foreground */
+  --fg-1: var(--slate-50);
+  --fg-2: var(--slate-200);
+  --fg-3: var(--slate-400);
+  --fg-4: var(--slate-500);
+  --fg-accent:    var(--indigo-400);
+  --fg-on-accent: #FFFFFF;
+
+  /* Borders */
+  --border-subtle: rgba(148, 163, 184, 0.08);
+  --border-card:   rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --border-accent: var(--indigo-400);
+
+  /* Brand accent — lighter in dark for contrast */
+  --color-accent-50:  var(--indigo-50);
+  --color-accent-100: var(--indigo-100);
+  --color-accent-200: var(--indigo-200);
+  --color-accent-300: var(--indigo-300);
+  --color-accent-400: var(--indigo-400);
+  --color-accent-500: var(--indigo-500);    /* primary CTA in dark */
+  --color-accent-600: var(--indigo-600);
+  --color-accent-700: var(--indigo-700);
+  --color-accent-fg:  var(--indigo-300);
+  --color-accent-bg:  rgba(99, 102, 241, 0.12);
+
+  /* Semantic */
+  --color-success-fg:   var(--emerald-300);
+  --color-success-dot:  var(--emerald-400);
+  --color-success-bg:   rgba(16, 185, 129, 0.10);
+  --color-success-bd:   rgba(52, 211, 153, 0.25);
+
+  --color-warning-fg:   var(--amber-300);
+  --color-warning-dot:  var(--amber-400);
+  --color-warning-bg:   rgba(245, 158, 11, 0.10);
+  --color-warning-bd:   rgba(251, 191, 36, 0.25);
+
+  --color-danger-fg:    var(--rose-300);
+  --color-danger-dot:   var(--rose-400);
+  --color-danger-bg:    rgba(244, 63, 94, 0.10);
+  --color-danger-bd:    rgba(251, 113, 133, 0.25);
+
+  --color-info-fg:      var(--sky-300);
+  --color-info-dot:     var(--sky-400);
+  --color-info-bg:      rgba(14, 165, 233, 0.10);
+  --color-info-bd:      rgba(56, 189, 248, 0.25);
+
+  /* Shadows — deeper for dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 24px 64px -16px rgba(0, 0, 0, 0.65);
+  --shadow-glow-accent:  0 0 0 4px rgba(129, 140, 248, 0.20);
+  --shadow-glow-success: 0 0 0 4px rgba(52, 211, 153, 0.20);
+}
+
+/* Optional: follow system preference if no explicit data-theme is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Duplicate of dark theme — kept inline so single-file
+       prototypes work without JS. To opt out, set
+       <html data-theme="light">. */
+    --surface-page:        var(--slate-900);
+    --surface-card:        var(--slate-800);
+    --surface-card-alt:    var(--slate-850);
+    --surface-card-raised: var(--slate-700);
+    --surface-input:       var(--slate-850);
+    --surface-sunk:        var(--slate-950);
+    --surface-overlay:     rgba(2, 6, 23, 0.72);
+    --surface-tint-accent: rgba(99, 102, 241, 0.10);
+    --fg-1: var(--slate-50);
+    --fg-2: var(--slate-200);
+    --fg-3: var(--slate-400);
+    --fg-4: var(--slate-500);
+    --fg-accent:    var(--indigo-400);
+    --fg-on-accent: #FFFFFF;
+    --border-subtle: rgba(148, 163, 184, 0.08);
+    --border-card:   rgba(148, 163, 184, 0.12);
+    --border-strong: rgba(148, 163, 184, 0.22);
+    --border-accent: var(--indigo-400);
+    --color-accent-500: var(--indigo-500);
+    --color-accent-600: var(--indigo-600);
+    --color-accent-fg:  var(--indigo-300);
+    --color-accent-bg:  rgba(99, 102, 241, 0.12);
+    --color-success-fg:   var(--emerald-300);
+    --color-success-dot:  var(--emerald-400);
+    --color-success-bg:   rgba(16, 185, 129, 0.10);
+    --color-success-bd:   rgba(52, 211, 153, 0.25);
+    --color-warning-fg:   var(--amber-300);
+    --color-warning-dot:  var(--amber-400);
+    --color-warning-bg:   rgba(245, 158, 11, 0.10);
+    --color-warning-bd:   rgba(251, 191, 36, 0.25);
+    --color-danger-fg:    var(--rose-300);
+    --color-danger-dot:   var(--rose-400);
+    --color-danger-bg:    rgba(244, 63, 94, 0.10);
+    --color-danger-bd:    rgba(251, 113, 133, 0.25);
+    --color-info-fg:      var(--sky-300);
+    --color-info-dot:     var(--sky-400);
+    --color-info-bg:      rgba(14, 165, 233, 0.10);
+    --color-info-bd:      rgba(56, 189, 248, 0.25);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
+    --shadow-xl: 0 24px 64px -16px rgba(0, 0, 0, 0.65);
+    --shadow-glow-accent:  0 0 0 4px rgba(129, 140, 248, 0.20);
+  }
+}
+
+/* ============================================================
+   SEMANTIC TYPOGRAPHY CLASSES
+   ============================================================ */
+body, .body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-normal);
+  color: var(--fg-1);
+  background: var(--surface-page);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.h1, h1 { font-size: var(--text-3xl); font-weight: var(--weight-bold); line-height: var(--lh-tight); letter-spacing: var(--tracking-tight); color: var(--fg-1); }
+.h2, h2 { font-size: var(--text-2xl); font-weight: var(--weight-bold); line-height: var(--lh-snug); letter-spacing: var(--tracking-snug); color: var(--fg-1); }
+.h3, h3 { font-size: var(--text-xl); font-weight: var(--weight-semibold); line-height: var(--lh-snug); color: var(--fg-1); }
+.h4, h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--lh-snug); color: var(--fg-1); }
+
+.eyebrow { font-size: var(--text-xs); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--fg-3); }
+
+.body-lg { font-size: var(--text-md); line-height: var(--lh-normal); color: var(--fg-2); }
+.body    { font-size: var(--text-base); line-height: var(--lh-normal); color: var(--fg-2); }
+.body-sm { font-size: var(--text-sm); line-height: var(--lh-normal); color: var(--fg-2); }
+.caption { font-size: var(--text-xs); line-height: var(--lh-normal); color: var(--fg-3); }
+.meta    { font-size: var(--text-2xs); line-height: var(--lh-normal); color: var(--fg-3); letter-spacing: var(--tracking-wide); }
+
+.metric-xl { font-family: var(--font-mono); font-size: var(--text-4xl); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; letter-spacing: var(--tracking-tight); color: var(--fg-1); }
+.metric    { font-family: var(--font-mono); font-size: var(--text-2xl); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; color: var(--fg-1); }
+.mono      { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.display-1 { font-size: var(--text-6xl); font-weight: var(--weight-bold); line-height: var(--lh-tight); letter-spacing: var(--tracking-tight); }
+.display-2 { font-size: var(--text-5xl); font-weight: var(--weight-bold); line-height: var(--lh-tight); letter-spacing: var(--tracking-tight); }

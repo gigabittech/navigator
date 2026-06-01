@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  ci:
+    name: typecheck · lint · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+          NEXT_PUBLIC_ELECTRIC_URL: http://localhost:5133
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # The Playwright webServer (apps/web/playwright.config.ts) runs
+    # `pnpm dev`; under CI it starts its own server, so this job needs the
+    # local-mode public env so the app shell boots without a real Supabase or
+    # Electric backend.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      NEXT_PUBLIC_ELECTRIC_URL: http://localhost:5133
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter=@navigator/web exec playwright install --with-deps chromium
+
+      - name: Run e2e
+        run: pnpm test:e2e
+
+  rls-check:
+    name: RLS check on new migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify every CREATE TABLE has matching RLS
+        run: |
+          set -e
+          # Look at changed SQL files in this PR
+          BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
+          changed=$(git diff --name-only "$BASE_SHA"...HEAD -- 'db/migrations/*.sql' || true)
+          if [ -z "$changed" ]; then
+            echo "No migrations changed."
+            exit 0
+          fi
+          fail=0
+          for f in $changed; do
+            tables=$(grep -oE 'CREATE TABLE (IF NOT EXISTS )?[A-Za-z_]+' "$f" | awk '{print $NF}' || true)
+            for t in $tables; do
+              # Skip if the same PR enables RLS for the table in any
+              # changed migration.
+              if ! grep -rqE "ALTER TABLE[[:space:]]+$t[[:space:]]+ENABLE ROW LEVEL SECURITY" db/migrations/; then
+                echo "::error file=$f::Table $t has no ENABLE ROW LEVEL SECURITY in db/migrations/."
+                fail=1
+              fi
+            done
+          done
+          exit $fail

@@ -1,0 +1,44 @@
+{
+  "name": "@navigator/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./tokens.css": "./src/tokens.css",
+    "./tailwind-preset": {
+      "types": "./src/tailwind-preset.ts",
+      "import": "./src/tailwind-preset.ts"
+    },
+    "./components": {
+      "types": "./src/components/index.ts",
+      "import": "./src/components/index.ts"
+    },
+    "./assets/*": "./src/assets/*",
+    "./fonts/*": "./src/fonts/*"
+  },
+  "files": ["src"],
+  "scripts": {
+    "dev": "tsc --watch --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings=0",
+    "clean": "rm -rf .turbo dist"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.456.0",
+    "tailwind-merge": "^2.5.4"
+  },
+  "peerDependencies": {
+    "react": "^18.3.0",
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.6.0"
+  }
+}
