@@ -5,6 +5,7 @@ import { Card, Pill } from "@navigator/design-system/components";
 import { useTimeline } from "@/lib/db/queries/useTimeline";
 import { useMedications } from "@/lib/db/queries/useMedications";
 import { useChild } from "@/lib/db/queries/useChild";
+import { useProfileNames } from "@/lib/db/queries/useProfileNames";
 import { dayHeading, dayKey, relativeTime } from "@/lib/time";
 import { describeEvent } from "./_components/eventDisplay";
 import type { EventRow } from "@/lib/db/types";
@@ -13,6 +14,7 @@ export default function TimelinePage() {
   const child = useChild();
   const events = useTimeline(300, child?.id);
   const meds = useMedications();
+  const profiles = useProfileNames();
 
   const medName = useMemo(() => {
     const byId = new Map(meds.map((m) => [m.id, m.name]));
@@ -51,12 +53,20 @@ export default function TimelinePage() {
             </h2>
             {group.items.map((e) => {
               const d = describeEvent(e, medName);
+              // Only attribute rows a co-parent (non-owner) logged — the
+              // primary parent's own logs stay uncluttered.
+              const byCoParent = !profiles.isOwner(e.loggedBy);
               return (
                 <Card key={e.id} alt elevation="flat" className="p-4" data-testid="timeline-event">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-base font-medium text-fg-1 truncate">{d.title}</p>
                       {d.detail ? <p className="text-sm text-fg-3 mt-0.5">{d.detail}</p> : null}
+                      {byCoParent ? (
+                        <p className="text-2xs text-fg-4 mt-1">
+                          Logged by {profiles.nameOf(e.loggedBy)}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       {d.status ? <Pill tone={d.tone}>{d.status}</Pill> : null}

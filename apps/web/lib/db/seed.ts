@@ -45,6 +45,24 @@ export async function seedIfEmpty(
   );
   const childId = childRes.rows[0]!.id;
 
+  // A co-parent who shares the logging. Gives the timeline real attribution
+  // ("logged by Sam") and the settings co-parents list someone to show. Once
+  // sync lands, real collaborators arrive from the server in the same shape.
+  const coParentRes = await db.query<{ id: string }>(
+    `INSERT INTO profiles (id, email, full_name, role)
+     VALUES ($1, $2, $3, 'co_parent')
+     ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name
+     RETURNING id`,
+    [crypto.randomUUID(), "sam@navigator.local", "Sam Rivera"],
+  );
+  const coParentId = coParentRes.rows[0]!.id;
+  await db.query(
+    `INSERT INTO child_collaborators (child_id, collaborator_id, role)
+     VALUES ($1, $2, 'co_parent')
+     ON CONFLICT (child_id, collaborator_id) DO NOTHING`,
+    [childId, coParentId],
+  );
+
   const meds: { id: string; name: string; dose: number; times: string[] }[] = [];
   const medSpecs = [
     { name: "Methylphenidate ER", dose: 10, category: "stimulant", times: ["07:00", "12:00"] },
@@ -82,11 +100,12 @@ export async function seedIfEmpty(
     type: string,
     occurredAt: string,
     payload: Record<string, unknown>,
+    loggedBy: string = profileId,
   ) => {
     await db.query(
       `INSERT INTO log_events (child_id, logged_by, event_type, payload, occurred_at, client_id, sequence_num)
        VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7)`,
-      [childId, profileId, type, JSON.stringify(payload), occurredAt, clientId, seq++],
+      [childId, loggedBy, type, JSON.stringify(payload), occurredAt, clientId, seq++],
     );
   };
 
@@ -109,8 +128,11 @@ export async function seedIfEmpty(
     for (const med of meds) {
       for (const t of med.times) {
         const scheduledFor = slotIso(day, t);
-        // The evening slot is almost always taken regardless of the daytime pattern.
-        const slotOutcome = t === "20:00" ? "taken" : outcome;
+        // The evening slot is almost always taken regardless of the daytime
+        // pattern — and the co-parent (Sam) handles the evening dose.
+        const isEvening = t === "20:00";
+        const slotOutcome = isEvening ? "taken" : outcome;
+        const loggedBy = isEvening ? coParentId : profileId;
 
         if (slotOutcome === "taken") {
           const occurred = new Date(new Date(scheduledFor).getTime() + 4 * 60000);
@@ -119,7 +141,7 @@ export async function seedIfEmpty(
             scheduled_for: scheduledFor,
             dose_mg: med.dose,
             minutes_offset: 4,
-          });
+          }, loggedBy);
         } else if (slotOutcome === "late") {
           const occurred = new Date(new Date(scheduledFor).getTime() + 38 * 60000);
           await insertEvent(EventType.Late, occurred.toISOString(), {
