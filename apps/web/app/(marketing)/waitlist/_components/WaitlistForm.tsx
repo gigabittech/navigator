@@ -1,5 +1,6 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button, Field } from "@navigator/design-system/components";
 import { joinWaitlist, type WaitlistResult } from "../_actions";
@@ -13,11 +14,15 @@ export function WaitlistForm({ inline }: WaitlistFormProps) {
   const [result, setResult] = useState<WaitlistResult | null>(null);
   const [pending, setPending] = useState(false);
 
-  async function submit(formData: FormData) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setPending(true);
-    const res = await joinWaitlist(formData);
-    setResult(res);
-    setPending(false);
+    try {
+      const res = await joinWaitlist(new FormData(event.currentTarget));
+      setResult(res);
+    } finally {
+      setPending(false);
+    }
   }
 
   if (result?.ok) {
@@ -30,7 +35,7 @@ export function WaitlistForm({ inline }: WaitlistFormProps) {
 
   if (inline) {
     return (
-      <form action={submit} className="cta-form">
+      <form onSubmit={submit} className="cta-form">
         <input
           type="email"
           name="email"
@@ -50,7 +55,7 @@ export function WaitlistForm({ inline }: WaitlistFormProps) {
   }
 
   return (
-    <form action={submit} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-4">
       <Field label="Email" name="email" type="email" placeholder="you@example.com" required />
       <Field
         label="What you're managing"

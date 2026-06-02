@@ -1,5 +1,6 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button, Field } from "@navigator/design-system/components";
 import { requestCode, verifyCode, type AuthResult } from "../_actions";
@@ -10,27 +11,37 @@ export function SignInForm() {
   const [result, setResult] = useState<AuthResult | null>(null);
   const [pending, setPending] = useState(false);
 
-  async function onRequest(formData: FormData) {
+  async function onRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     setPending(true);
-    setEmail(String(formData.get("email") ?? ""));
-    const res = await requestCode(formData);
-    setResult(res);
-    if (res.ok && res.stage === "code") setStage("code");
-    setPending(false);
+    try {
+      setEmail(String(formData.get("email") ?? ""));
+      const res = await requestCode(formData);
+      setResult(res);
+      if (res.ok && res.stage === "code") setStage("code");
+    } finally {
+      setPending(false);
+    }
   }
 
-  async function onVerify(formData: FormData) {
+  async function onVerify(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
     setPending(true);
     formData.set("email", email);
-    const res = await verifyCode(formData);
-    // On success the action redirects; only failures return here.
-    setResult(res);
-    setPending(false);
+    try {
+      const res = await verifyCode(formData);
+      // On success the action redirects; only failures return here.
+      setResult(res);
+    } finally {
+      setPending(false);
+    }
   }
 
   if (stage === "code") {
     return (
-      <form action={onVerify} className="flex flex-col gap-4">
+      <form onSubmit={onVerify} className="flex flex-col gap-4">
         <p className="text-sm text-fg-2">{result?.message ?? `Code sent to ${email}.`}</p>
         <Field
           label="6-digit code"
@@ -59,7 +70,7 @@ export function SignInForm() {
   }
 
   return (
-    <form action={onRequest} className="flex flex-col gap-4">
+    <form onSubmit={onRequest} className="flex flex-col gap-4">
       <Field label="Email" name="email" type="email" placeholder="you@example.com" required />
       {result && !result.ok ? <p className="text-xs text-danger-fg">{result.message}</p> : null}
       <Button type="submit" size="lg" disabled={pending}>
