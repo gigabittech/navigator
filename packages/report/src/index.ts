@@ -13,3 +13,4 @@
 export * from "./generate.js";
 export * from "./sections.js";
 export * from "./types.js";
+export * from "./pseudonymize.js";

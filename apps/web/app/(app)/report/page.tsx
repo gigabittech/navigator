@@ -9,6 +9,7 @@ import { loadReportWindow } from "@/lib/db/queries/reportWindow";
 import { useChild } from "@/lib/db/queries/useChild";
 import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
 import { generateNarrative, NarrativeUnavailableError } from "@/lib/ai/narrative";
+import { CLINICAL_DISCLAIMER } from "@/lib/disclaimer";
 
 const WINDOW_DAYS = 90;
 
@@ -315,7 +316,11 @@ export default function ReportPage() {
     setNarrating(true);
     setNote(null);
     try {
-      const narrative = await generateNarrative(report, child.id);
+      const narrative = await generateNarrative(report, {
+        id: child.id,
+        dateOfBirth: child.dateOfBirth,
+        diagnosesNotes: child.diagnosesNotes,
+      });
       setReport({ ...report, narrative });
     } catch (err) {
       setNote(
@@ -403,6 +408,10 @@ export default function ReportPage() {
           </div>
 
           {note ? <p className="text-sm text-fg-3">{note}</p> : null}
+
+          <p className="border-t border-border-card pt-3 text-2xs text-fg-4">
+            {CLINICAL_DISCLAIMER}
+          </p>
         </>
       )}
     </div>

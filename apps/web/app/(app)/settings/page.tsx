@@ -33,16 +33,35 @@ export default function SettingsPage() {
   }
 
   async function exportData() {
-    const [childRows, medRows, eventRows] = await Promise.all([
+    // HIPAA right of access / data portability: export ALL of the user's data,
+    // not just doses. Every child-scoped table on the device is included.
+    const [
+      profileRows,
+      childRows,
+      collaboratorRows,
+      medRows,
+      apptRows,
+      eventRows,
+      reportRows,
+    ] = await Promise.all([
+      db.query("SELECT * FROM profiles"),
       db.query("SELECT * FROM children"),
+      db.query("SELECT * FROM child_collaborators"),
       db.query("SELECT * FROM medications"),
+      db.query("SELECT * FROM appointments"),
       db.query("SELECT * FROM log_events ORDER BY occurred_at"),
+      db.query("SELECT * FROM reports ORDER BY generated_at"),
     ]);
     const payload = {
       exportedAt: new Date().toISOString(),
-      child: childRows.rows,
+      format: "navigator-export-v2",
+      profiles: profileRows.rows,
+      children: childRows.rows,
+      collaborators: collaboratorRows.rows,
       medications: medRows.rows,
+      appointments: apptRows.rows,
       events: eventRows.rows,
+      reports: reportRows.rows,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);

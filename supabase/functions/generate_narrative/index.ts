@@ -25,14 +25,20 @@ function buildPrompt(report: AnyReport): string {
     .map((s: AnyReport) => `## ${s.title}\n${s.body}`)
     .join("\n\n");
 
+  // The payload is pseudonymized upstream (HIPAA minimum-necessary): there is no
+  // name, DOB, or free-text notes here — only an age range and a controlled
+  // diagnosis category. Refer to "the child" only.
+  const ageRange = report.child?.ageRange ?? "unspecified";
+  const dxCategory = report.child?.diagnosisCategory ?? "unspecified";
+
   return [
     "You are helping a parent prepare for a short psychiatric appointment about their child.",
     "Write a calm, factual 2–3 paragraph summary a clinician can read in under a minute.",
-    "Rules: use the parent's own words where given; do not diagnose or recommend dose changes;",
-    "lead with adherence and any notable patterns; second person ('you'); no exclamation marks.",
+    "Rules: refer to the child only as 'the child' (you are given no name); do not diagnose",
+    "or recommend dose changes; lead with adherence and any notable patterns; second person",
+    "('you'); no exclamation marks.",
     "",
-    `Child: ${report.child?.preferredName ?? "the child"}`,
-    report.child?.diagnosesNotes ? `Parent's notes: ${report.child.diagnosesNotes}` : "",
+    `Child: the child (age range ${ageRange}, diagnosis category ${dxCategory})`,
     `Window: ${report.rangeStart} to ${report.rangeEnd}`,
     `Adherence: ${report.highlights?.adherenceRate}% over ${report.highlights?.daysCovered} days, ${report.highlights?.eventsLogged} events.`,
     "",

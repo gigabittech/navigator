@@ -7,6 +7,7 @@
 
 import { Document, Page, StyleSheet, Text, View, pdf } from "@react-pdf/renderer";
 import type { Report } from "@navigator/report";
+import { CLINICAL_DISCLAIMER } from "../disclaimer";
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 11, fontFamily: "Helvetica", color: "#0F172A", lineHeight: 1.5 },
@@ -25,6 +26,7 @@ const styles = StyleSheet.create({
   statFlag: { color: "#B45309" },
   body: { fontSize: 11, color: "#334155" },
   divider: { borderBottomWidth: 1, borderBottomColor: "#E2E8F0", marginTop: 8 },
+  disclaimer: { marginTop: 22, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#E2E8F0", fontSize: 8, color: "#64748B", lineHeight: 1.4 },
   footer: { position: "absolute", bottom: 28, left: 40, right: 40, fontSize: 8, color: "#94A3B8" },
 });
 
@@ -83,6 +85,8 @@ function ReportDocument({ report }: { report: Report }) {
             <Text style={styles.body}>{s.body}</Text>
           </View>
         ))}
+
+        <Text style={styles.disclaimer}>{CLINICAL_DISCLAIMER}</Text>
 
         <Text
           style={styles.footer}
