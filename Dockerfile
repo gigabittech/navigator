@@ -42,10 +42,11 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # webpack error reporter truncates output and only shows the module identifier.
 RUN <<EOF
 node -e "
-const path = require('path');
-const postcss = require('/app/node_modules/postcss');
-const tailwindcss = require('/app/node_modules/tailwindcss');
-const autoprefixer = require('/app/node_modules/autoprefixer');
+const { createRequire } = require('module');
+const requireFromWeb = createRequire('/app/apps/web/package.json');
+const postcss = requireFromWeb('postcss');
+const tailwindcss = requireFromWeb('tailwindcss');
+const autoprefixer = requireFromWeb('autoprefixer');
 const fs = require('fs');
 const css = fs.readFileSync('/app/apps/web/app/globals.css', 'utf8');
 postcss([tailwindcss({ config: '/app/apps/web/tailwind.config.cjs' }), autoprefixer()])
