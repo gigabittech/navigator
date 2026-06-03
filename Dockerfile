@@ -40,7 +40,8 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Smoke-test the PostCSS/Tailwind pipeline before running the full webpack build.
 # This surfaces the real error message if config loading fails, since the Next.js
 # webpack error reporter truncates output and only shows the module identifier.
-RUN node -e "
+RUN <<EOF
+node -e "
 const path = require('path');
 const postcss = require('/app/node_modules/postcss');
 const tailwindcss = require('/app/node_modules/tailwindcss');
@@ -52,6 +53,7 @@ postcss([tailwindcss({ config: '/app/apps/web/tailwind.config.cjs' }), autoprefi
   .then(r => { console.log('PostCSS OK — output', r.css.length, 'bytes'); })
   .catch(e => { console.error('PostCSS FAILED:', e.message); process.exit(1); });
 "
+EOF
 
 RUN pnpm --filter @navigator/web build
 
