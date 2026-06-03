@@ -16,6 +16,7 @@ import { useAuthUser } from "@/lib/auth/useAuthUser";
 import { MedicationForm } from "./_components/MedicationForm";
 import { CoParents } from "./_components/CoParents";
 import { Reminders } from "./_components/Reminders";
+import { TwoFactor } from "./_components/TwoFactor";
 
 export default function SettingsPage() {
   const db = usePGlite();
@@ -220,6 +221,8 @@ export default function SettingsPage() {
           </div>
         </Card>
       </section>
+
+      <TwoFactor />
     </div>
   );
 }
