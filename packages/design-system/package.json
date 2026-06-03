@@ -11,6 +11,7 @@
     },
     "./tokens.css": "./src/tokens.css",
     "./tailwind-preset": {
+      "require": "./src/tailwind-preset.cjs",
       "types": "./src/tailwind-preset.ts",
       "import": "./src/tailwind-preset.ts"
     },

@@ -37,6 +37,22 @@ COPY . .
 # Give webpack enough heap for the full production build.
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
+# Smoke-test the PostCSS/Tailwind pipeline before running the full webpack build.
+# This surfaces the real error message if config loading fails, since the Next.js
+# webpack error reporter truncates output and only shows the module identifier.
+RUN node -e "
+const path = require('path');
+const postcss = require('/app/node_modules/postcss');
+const tailwindcss = require('/app/node_modules/tailwindcss');
+const autoprefixer = require('/app/node_modules/autoprefixer');
+const fs = require('fs');
+const css = fs.readFileSync('/app/apps/web/app/globals.css', 'utf8');
+postcss([tailwindcss({ config: '/app/apps/web/tailwind.config.cjs' }), autoprefixer()])
+  .process(css, { from: '/app/apps/web/app/globals.css' })
+  .then(r => { console.log('PostCSS OK — output', r.css.length, 'bytes'); })
+  .catch(e => { console.error('PostCSS FAILED:', e.message); process.exit(1); });
+"
+
 RUN pnpm --filter @navigator/web build
 
 # ── runner: minimal production image ─────────────────────────────────────────
