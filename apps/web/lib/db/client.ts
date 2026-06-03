@@ -59,25 +59,30 @@ async function initDb(): Promise<PGliteWithLive> {
   // Idempotent: every statement is IF NOT EXISTS / CREATE OR REPLACE.
   await db.exec(localSchema);
 
-  // Resolve the auth identity (if any) so seed data is stamped with the real
-  // user's Supabase ID rather than the hardcoded demo values.
-  let seedUserId: string | undefined;
-  let seedUserEmail: string | undefined;
+  // Decide whether to load the demo dataset (one child "Wren", a co-parent, a
+  // week of events). This is for LOCAL / DEMO mode only — it makes the product
+  // explorable with no setup. A REAL signed-in user must NOT get a fabricated
+  // child: they start empty so the FirstRunGuard routes them to onboarding.
+  //
+  // Boundary: a demo run is one with no authenticated Supabase session.
+  let signedInUser: { id: string; email?: string } | undefined;
   if (isSupabaseConfigured()) {
     try {
       const {
         data: { session },
       } = await createBrowserClient().auth.getSession();
       if (session?.user) {
-        seedUserId = session.user.id;
-        seedUserEmail = session.user.email ?? undefined;
+        signedInUser = { id: session.user.id, email: session.user.email ?? undefined };
       }
     } catch {
-      // If auth lookup fails (e.g. network down at first run), fall through
-      // to demo values — the seed guard prevents a second run anyway.
+      // Auth lookup failed (e.g. offline at first run). Treat as not-signed-in;
+      // the seed guard still prevents a duplicate run if a session appears later.
     }
   }
 
-  await seedIfEmpty(db, seedUserId, seedUserEmail);
+  // Real user → no demo seed (empty DB → onboarding). Otherwise seed the demo.
+  if (!signedInUser) {
+    await seedIfEmpty(db);
+  }
   return db;
 }

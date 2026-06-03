@@ -1,8 +1,24 @@
 # Deploying Navigator
 
-This document covers everything you need to go from a fresh clone to a live
-deployment. The app is designed to work in local-only mode with no credentials,
-so you can run it without Supabase during development.
+From a fresh clone to a live deployment on **Supabase + Vercel**. The app runs in
+local-only mode with no credentials, so you can develop without Supabase.
+
+---
+
+## One-shot deploy checklist
+
+```
+[ ] 1. Create a Supabase project; note the URL + anon key + service_role key
+[ ] 2. Apply ALL migrations:        ./scripts/run-migrations.sh   (DATABASE_URL set)
+[ ] 3. Link the CLI:                supabase link --project-ref <ref>
+[ ] 4. Deploy ALL edge functions:   ./scripts/deploy-edge-functions.sh
+[ ] 5. Set edge-function secrets (see §"Edge Function secrets")
+[ ] 6. Schedule the two cron jobs   (send_reminders 5-min, purge_expired daily)
+[ ] 7. Configure email (Resend → Supabase SMTP)
+[ ] 8. Push to GitHub; import in Vercel; set Vercel env vars (see §"Vercel")
+[ ] 9. Lock CORS:                   supabase secrets set ALLOWED_ORIGIN=https://<app>.vercel.app
+[ ] 10. (optional) Enable the /dev backdoor for the team (see §"Dev access")
+```
 
 ---
 
@@ -10,239 +26,151 @@ so you can run it without Supabase during development.
 
 | Tool | Version | Install |
 |---|---|---|
-| Node.js | 20+ | https://nodejs.org or `nvm use` (`.nvmrc` pins the version) |
-| pnpm | 8+ | `npm i -g pnpm` |
+| Node.js | 20+ | `nvm use` (`.nvmrc` pins it) |
+| pnpm | 9+ | `npm i -g pnpm` |
 | Supabase CLI | latest | `brew install supabase/tap/supabase` |
-| psql | any | Ships with Postgres; or `brew install libpq` |
-| Vercel CLI | latest (optional) | `npm i -g vercel` |
+| psql | any | `brew install libpq` |
+| Vercel CLI | optional | `npm i -g vercel` |
 
 ---
 
 ## Local development
 
-### 1. Copy the env file
-
 ```bash
-cp apps/web/.env.example apps/web/.env.local
-```
-
-Fill in the Supabase values (see [Supabase setup](#supabase-setup) below), or
-leave them blank to run in local-only mode. The app boots and is fully usable
-without any credentials — data lives in IndexedDB on the device.
-
-### 2. Install dependencies
-
-```bash
+cp apps/web/.env.example apps/web/.env.local   # fill in, or leave blank for local mode
 pnpm install
+pnpm dev                                        # http://localhost:3000
 ```
 
-### 3. Start the dev server
-
-```bash
-pnpm dev
-```
-
-The app runs at http://localhost:3000.
-
-### 4. Local-only mode (no Supabase)
-
-When `NEXT_PUBLIC_SUPABASE_URL` is not set:
-
-- The auth gate is disabled — you can navigate the app without signing in.
-- Data is stored in IndexedDB via PGlite.
-- Waitlist signup logs to the console; no email is sent.
-- AI features (narrative, voice transcription) show a "not configured" message.
-
-This is intentional. Local mode is the default development and demo state.
+**Local-only mode** (no `NEXT_PUBLIC_SUPABASE_URL`): the auth gate is off, data
+lives in IndexedDB (PGlite), the demo dataset (one child "Wren", a co-parent, a
+week of events) seeds on first boot, and AI/voice show a "not configured" state.
+This is the default dev + demo state. A real signed-in user does **not** get the
+demo seed — they start empty and are routed to onboarding.
 
 ---
 
 ## Supabase setup
 
 ### 1. Create a project
+At https://app.supabase.com. Note the **Project URL**, **anon key**, and
+**service_role key** (Settings → API).
 
-Go to https://app.supabase.com and create a new project. Note your:
-
-- **Project URL** (e.g. `https://abcdefgh.supabase.co`)
-- **Anon key** (under Settings → API → Project API keys)
-
-### 2. Add credentials to `.env.local`
-
+### 2. Apply migrations (ALL of them)
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://abcdefgh.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-```
-
-### 3. Run migrations
-
-The migrations create the schema and enable RLS on every table.
-
-```bash
-# Get the connection string from: Supabase Dashboard → Settings → Database → Connection string (URI)
 export DATABASE_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
-
 ./scripts/run-migrations.sh
 ```
+The script applies **every** file in `db/migrations/*.sql` in order (0001→0011):
+schema, RLS on every table, append-only triggers, the sync outbox + push +
+audit-log + rate-limit tables, and the `handle_new_user` profile trigger. All
+migrations are idempotent, so re-running is safe.
 
-This runs `db/migrations/0001_init.sql` then `db/migrations/0002_rls_policies.sql`
-in order.
-
-### 4. Link the Supabase CLI
-
+### 3. Link the CLI
 ```bash
-supabase link --project-ref <your-project-ref>
+supabase link --project-ref <your-project-ref>   # the subdomain of your Supabase URL
 ```
 
-The project ref is the subdomain part of your Supabase URL (e.g. `abcdefgh`).
-
-### 5. Deploy Edge Functions
-
+### 4. Deploy Edge Functions (all five)
 ```bash
 ./scripts/deploy-edge-functions.sh
 ```
+Deploys: `generate_narrative`, `transcribe_voice`, `delete_account` (JWT-verified,
+browser-invoked) and `send_reminders`, `purge_expired` (`--no-verify-jwt`,
+scheduler-invoked via the `x-cron-secret` header).
 
-This deploys `generate_narrative` (Claude-backed clinical narrative) and
-`transcribe_voice` (OpenAI Whisper transcription).
-
-### 6. Set Edge Function secrets
-
-The API keys must never appear in the client bundle. Set them as Supabase secrets:
-
+### 5. Edge Function secrets
+API keys never appear in the client bundle — set them as Supabase secrets:
 ```bash
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
-supabase secrets set OPENAI_API_KEY=sk-...
+# AI
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-...      # generate_narrative
+supabase secrets set OPENAI_API_KEY=sk-...             # transcribe_voice
+# CORS (lock to your deployment; fail-closed in production)
+supabase secrets set ALLOWED_ORIGIN=https://<your-app>.vercel.app
+# Cron auth (shared by send_reminders + purge_expired)
+supabase secrets set CRON_SECRET=$(openssl rand -hex 32)
+# Web Push (dose reminders) — generate once: npx web-push generate-vapid-keys
+supabase secrets set VAPID_PUBLIC_KEY=<pub> VAPID_PRIVATE_KEY=<priv> \
+                     VAPID_SUBJECT=mailto:alerts@navigator.app
 ```
+The VAPID **public** key also goes in Vercel as `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+(so the client can subscribe).
 
-To lock CORS to your production domain (recommended in production):
+### 6. Schedule the cron jobs
+In **Supabase Dashboard → Edge Functions → Schedules** (or pg_cron), invoke each
+function URL with header `x-cron-secret: <CRON_SECRET>`:
 
-```bash
-supabase secrets set ALLOWED_ORIGIN=https://your-deployment.vercel.app
-```
+| Function | Cadence | Purpose |
+|---|---|---|
+| `send_reminders` | every 5 minutes | dose reminders via Web Push |
+| `purge_expired` | daily | retention purge (waitlist 12mo, reports 2yr, voice transcripts 90d, rate-limit cleanup) |
 
-Without `ALLOWED_ORIGIN` set, the functions accept requests from any origin.
-This is fine for local development, but you should lock it down in production.
-
-### 7. Configure email (Resend as Supabase SMTP)
-
-Magic link + OTP emails are sent by Supabase Auth. To send them from your own
-domain, point Supabase's SMTP at Resend:
-
-1. Add a Resend API key to `.env.local`: `RESEND_API_KEY=re_...`
-2. In the Supabase Dashboard, go to **Authentication → SMTP Settings** and fill in:
-   - Host: `smtp.resend.com`
-   - Port: `465`
-   - User: `resend`
-   - Password: your Resend API key
-   - Sender email: `hello@yourdomain.com`
-
-Full guide: https://supabase.com/docs/guides/auth/auth-smtp
-
-The SMTP block is also pre-configured in `supabase/config.toml` (commented out)
-for local use — uncomment and fill in values there for the local emulator.
+### 7. Email (Resend → Supabase SMTP)
+Magic-link + OTP emails are sent by Supabase Auth. Point its SMTP at Resend:
+Dashboard → Authentication → SMTP Settings → host `smtp.resend.com`, port `465`,
+user `resend`, password = your Resend API key, sender = `hello@yourdomain.com`.
 
 ---
 
 ## Vercel deployment
 
-### 1. Push to GitHub
+1. Push to GitHub; import the repo at https://vercel.com/new (Next.js auto-detected).
+2. Set **Environment Variables**:
 
-The repo should be on GitHub. If it isn't:
-
-```bash
-git remote add origin https://github.com/your-org/navigator-app.git
-git push -u origin main
-```
-
-### 2. Import in Vercel
-
-Go to https://vercel.com/new and import the repository. Vercel will detect
-Next.js automatically.
-
-### 3. Set environment variables
-
-In Vercel's project settings under **Environment Variables**, add:
-
-| Variable | Value | Notes |
+| Variable | Required | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://abcdefgh.supabase.co` | From Supabase Dashboard → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...` | From Supabase Dashboard → API |
-| `RESEND_API_KEY` | `re_...` | From Resend Dashboard |
-| `RESEND_FROM` | `Navigator <hello@yourdomain.com>` | Sender identity for waitlist emails |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | `navigator.app` | Optional. Leave blank to disable analytics. |
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Supabase → API (safe to expose) |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | server-only; waitlist writes + dev login. NEVER `NEXT_PUBLIC` |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | for push | public half of the VAPID pair |
+| `RESEND_API_KEY` | optional | waitlist confirmation emails |
+| `WAITLIST_FROM` | optional | sender identity |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | optional | cookieless analytics (GPC-gated) |
+| `NEXT_PUBLIC_ELECTRIC_URL` | optional | cross-device sync (deferred) |
+| `DEV_LOGIN_ENABLED` | dev only | `true` to enable `/dev`. Leave unset in prod |
+| `DEV_LOGIN_SECRET` | dev only | random string the `/dev` form requires |
+| `DEV_LOGIN_EMAIL` | dev only | the dev user's email |
 
-Do not add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` here — those live in
-Supabase Edge Function secrets (see step 6 above).
+Do **not** put `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `VAPID_PRIVATE_KEY` /
+`CRON_SECRET` in Vercel — those live in Supabase Edge Function secrets.
 
-### 4. Deploy
-
-Vercel deploys automatically on every push to `main`. The first deploy will
-run when you save the environment variables.
-
-Preview deploys are created automatically for every pull request.
+Vercel deploys on every push to `main`; preview deploys per PR. The security
+headers (CSP, HSTS, COOP/COEP, X-Frame, Referrer) ship from `next.config.mjs`.
 
 ---
 
-## Testing auth locally
+## Dev access (the `/dev` backdoor)
 
-The Supabase CLI includes a local emulator with an email catcher (Inbucket).
-This lets you test OTP emails without a real email provider.
+The marketing site exposes only "Join the waitlist" — there is no public link
+into the app. For the team, `/dev` gives single-click login:
 
-### 1. Start the local Supabase stack
+- Set `DEV_LOGIN_ENABLED=true`, `DEV_LOGIN_SECRET=<random>`,
+  `DEV_LOGIN_EMAIL=<email>` (server-only) in Vercel (or `.env.local`).
+- Visit `/dev`, enter the secret → it mints a **real** Supabase session for the
+  dev user (via the service role; no OTP email) and lands on `/today`. The
+  session is a normal authenticated session — middleware, RLS, and the edge
+  functions all trust it.
+- In real production, leave `DEV_LOGIN_ENABLED` **unset**: `/dev` returns 404 and
+  the action is inert. Rotate `DEV_LOGIN_SECRET` if it leaks.
 
-```bash
-supabase start
-```
+---
 
-This starts Postgres on port 54322, the Auth API on port 54321, Studio on
-54323, and Inbucket on port 54324.
-
-### 2. Update `.env.local` for local emulator
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<the anon key printed by supabase start>
-```
-
-### 3. Open Inbucket to read OTP emails
-
-Go to http://localhost:54324 — this is the local email catcher. When you
-sign in with a magic link or 6-digit OTP in local dev, the email lands here.
-
-### 4. Stop the local stack
+## Testing auth locally (Supabase emulator)
 
 ```bash
+supabase start                       # Postgres :54322, Auth :54321, Studio :54323, Inbucket :54324
+# .env.local:
+#   NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY=<printed by supabase start>
+# Read OTP emails at http://localhost:54324 (Inbucket)
 supabase stop
 ```
 
 ---
 
-## Environment variables reference
-
-| Variable | Required | Where to find it | Notes |
-|---|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | For auth + sync | Supabase Dashboard → Settings → API | Leave blank for local-only mode |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For auth + sync | Supabase Dashboard → Settings → API | Safe to expose to browser |
-| `NEXT_PUBLIC_ELECTRIC_URL` | No (deferred) | Electric dashboard | Not wired in MVP; leave blank |
-| `RESEND_API_KEY` | No | Resend Dashboard | Waitlist emails; also used as Supabase SMTP pass |
-| `RESEND_FROM` | No | Your choice | Sender identity for waitlist emails |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | No | Your Plausible site slug | Marketing surface only; cookieless |
-| `ANTHROPIC_API_KEY` | No — Edge Fn only | Anthropic Console | Set via `supabase secrets set`, never in Vercel |
-| `OPENAI_API_KEY` | No — Edge Fn only | OpenAI Dashboard | Set via `supabase secrets set`, never in Vercel |
-| `ALLOWED_ORIGIN` | No — Edge Fn only | Your Vercel deployment URL | Set via `supabase secrets set` to lock CORS in production |
-
----
-
-## Seeding demo data (development only)
-
-To populate a remote Supabase DB with demo data for testing:
-
+## Seeding demo data on a remote DB (dev only)
 ```bash
 export DATABASE_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
-./scripts/seed-remote.sh
+./scripts/seed-remote.sh             # idempotent: one parent, one child, two meds
 ```
-
-This inserts one parent profile, one child, and two medications. It is
-idempotent — re-running it is safe.
-
-In local development with PGlite, the seed runs client-side and no script is
-needed — the app seeds itself on first boot if the DB is empty.
+In local PGlite the seed runs client-side automatically on first boot.

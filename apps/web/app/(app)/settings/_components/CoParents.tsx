@@ -88,7 +88,7 @@ export function CoParents({ childId }: { childId: string | undefined }) {
                 <button
                   type="button"
                   onClick={() => remove(person.id)}
-                  className="rounded-md px-2 py-1 text-2xs text-fg-4 hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-accent"
+                  className="rounded-md px-2 py-1 text-2xs text-fg-4 hover:text-danger-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-accent"
                   aria-label={`Remove ${person.fullName ?? person.email}`}
                 >
                   Remove

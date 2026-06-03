@@ -21,7 +21,21 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 echo "▶ Running migrations..."
-psql "$DATABASE_URL" -f "$REPO_ROOT/db/migrations/0001_init.sql"
-psql "$DATABASE_URL" -f "$REPO_ROOT/db/migrations/0002_rls_policies.sql"
 
-echo "✅ Migrations complete"
+# Apply every migration in sorted (numeric) order. All migrations are written to
+# be idempotent (IF NOT EXISTS / CREATE OR REPLACE / DROP ... IF EXISTS), so
+# re-running the whole set on an existing database is safe. -v ON_ERROR_STOP=1
+# halts on the first real error instead of plowing ahead.
+shopt -s nullglob
+migrations=("$REPO_ROOT"/db/migrations/*.sql)
+if [ ${#migrations[@]} -eq 0 ]; then
+  echo "❌ No migration files found in db/migrations/"
+  exit 1
+fi
+
+for f in $(printf '%s\n' "${migrations[@]}" | sort); do
+  echo "  → $(basename "$f")"
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
+
+echo "✅ Migrations complete (${#migrations[@]} files)"
