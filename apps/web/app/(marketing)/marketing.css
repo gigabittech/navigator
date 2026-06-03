@@ -6,10 +6,10 @@
 /* ── Token bridge — maps marketing vars to design-system tokens ── */
 :root {
   /* Accent */
-  --accent:        #4F46E5; /* indigo-600 */
+  --accent:        #059669; /* emerald-600 — primary brand accent */
   --accent-on:     #FFFFFF;
-  --accent-hover:  #4338CA; /* indigo-700 */
-  --accent-on-dark:#818CF8; /* indigo-400 */
+  --accent-hover:  #047857; /* emerald-700 */
+  --accent-on-dark:#34D399; /* emerald-400 — lighter on dark surfaces */
 
   /* Gold / italic emphasis */
   --gold:          #B8860B;

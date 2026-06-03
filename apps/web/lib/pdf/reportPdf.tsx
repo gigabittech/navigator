@@ -11,7 +11,7 @@ import { CLINICAL_DISCLAIMER } from "../disclaimer";
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 11, fontFamily: "Helvetica", color: "#0F172A", lineHeight: 1.5 },
-  brand: { fontSize: 10, color: "#4F46E5", fontFamily: "Helvetica-Bold", letterSpacing: 1 },
+  brand: { fontSize: 10, color: "#059669", fontFamily: "Helvetica-Bold", letterSpacing: 1 },
   title: { fontSize: 20, fontFamily: "Helvetica-Bold", marginTop: 6 },
   range: { fontSize: 10, color: "#64748B", marginTop: 2 },
   highlights: { flexDirection: "row", flexWrap: "wrap", gap: 16, marginTop: 18, marginBottom: 8 },

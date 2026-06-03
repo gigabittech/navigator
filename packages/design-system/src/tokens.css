@@ -96,12 +96,20 @@
   --warm-50:  #FAFAF7;
   --warm-100: #F5F4EF;
 
-  /* — Emerald (success / sync OK — more clinical than v1 lime) — */
+  /* — Emerald (PRIMARY accent + success / sync) — full 50–900 scale.
+       Primary CTA uses 600/700; success/sync uses 500/600 (see semantic
+       layer). 50/100/200/800/900 added so accent tints/backgrounds and
+       dark-theme steps resolve. — */
+  --emerald-50:  #ECFDF5;
+  --emerald-100: #D1FAE5;
+  --emerald-200: #A7F3D0;
   --emerald-300: #6EE7B7;
   --emerald-400: #34D399;
   --emerald-500: #10B981;
   --emerald-600: #059669;
   --emerald-700: #047857;
+  --emerald-800: #065F46;
+  --emerald-900: #064E3B;
 
   /* — Amber (warning — late / approaching wear-off) — */
   --amber-300: #FCD34D;
@@ -243,26 +251,30 @@
   --fg-2: var(--slate-700);
   --fg-3: var(--slate-500);
   --fg-4: var(--slate-400);
-  --fg-accent:    var(--indigo-600);
+  --fg-accent:    var(--emerald-700);
   --fg-on-accent: #FFFFFF;
 
   /* Borders */
   --border-subtle: rgba(15, 23, 42, 0.06);
   --border-card:   rgba(15, 23, 42, 0.10);
   --border-strong: rgba(15, 23, 42, 0.18);
-  --border-accent: var(--indigo-500);
+  --border-accent: var(--emerald-600);
 
-  /* Brand accent */
-  --color-accent-50:  var(--indigo-50);
-  --color-accent-100: var(--indigo-100);
-  --color-accent-200: var(--indigo-200);
-  --color-accent-300: var(--indigo-300);
-  --color-accent-400: var(--indigo-400);
-  --color-accent-500: var(--indigo-500);
-  --color-accent-600: var(--indigo-600);    /* primary CTA in light */
-  --color-accent-700: var(--indigo-700);
-  --color-accent-fg:  var(--indigo-600);
-  --color-accent-bg:  var(--indigo-50);
+  /* Brand accent — EMERALD (primary). Components consume --color-accent-*,
+     never the raw palette, so the whole app rethemes from here. The primary
+     CTA uses 600/700 (deeper than the 500 success dot) so "primary action" and
+     "synced" stay visually distinct; status is also never color-alone (icons
+     + labels), so the two greens never carry meaning by hue alone. */
+  --color-accent-50:  var(--emerald-50);
+  --color-accent-100: var(--emerald-100);
+  --color-accent-200: var(--emerald-200);
+  --color-accent-300: var(--emerald-300);
+  --color-accent-400: var(--emerald-400);
+  --color-accent-500: var(--emerald-500);
+  --color-accent-600: var(--emerald-600);    /* primary CTA in light */
+  --color-accent-700: var(--emerald-700);
+  --color-accent-fg:  var(--emerald-700);
+  --color-accent-bg:  var(--emerald-50);
 
   /* Semantic */
   --color-success-fg:   var(--emerald-600);
@@ -290,7 +302,7 @@
   --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
   --shadow-lg: 0 12px 32px -8px rgba(15, 23, 42, 0.12), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
   --shadow-xl: 0 24px 64px -16px rgba(15, 23, 42, 0.18);
-  --shadow-glow-accent:  0 0 0 4px rgba(99, 102, 241, 0.20);
+  --shadow-glow-accent:  0 0 0 4px rgba(16, 185, 129, 0.20);
   --shadow-glow-success: 0 0 0 4px rgba(16, 185, 129, 0.20);
 
   /* ----------------------------------------------------------------
@@ -384,26 +396,26 @@
   --fg-2: var(--slate-200);
   --fg-3: var(--slate-400);
   --fg-4: var(--slate-500);
-  --fg-accent:    var(--indigo-400);
+  --fg-accent:    var(--emerald-400);
   --fg-on-accent: #FFFFFF;
 
   /* Borders */
   --border-subtle: rgba(148, 163, 184, 0.08);
   --border-card:   rgba(148, 163, 184, 0.12);
   --border-strong: rgba(148, 163, 184, 0.22);
-  --border-accent: var(--indigo-400);
+  --border-accent: var(--emerald-400);
 
-  /* Brand accent — lighter in dark for contrast */
-  --color-accent-50:  var(--indigo-50);
-  --color-accent-100: var(--indigo-100);
-  --color-accent-200: var(--indigo-200);
-  --color-accent-300: var(--indigo-300);
-  --color-accent-400: var(--indigo-400);
-  --color-accent-500: var(--indigo-500);    /* primary CTA in dark */
-  --color-accent-600: var(--indigo-600);
-  --color-accent-700: var(--indigo-700);
-  --color-accent-fg:  var(--indigo-300);
-  --color-accent-bg:  rgba(99, 102, 241, 0.12);
+  /* Brand accent — EMERALD, lighter in dark for contrast */
+  --color-accent-50:  var(--emerald-50);
+  --color-accent-100: var(--emerald-100);
+  --color-accent-200: var(--emerald-200);
+  --color-accent-300: var(--emerald-300);
+  --color-accent-400: var(--emerald-400);
+  --color-accent-500: var(--emerald-500);    /* primary CTA in dark */
+  --color-accent-600: var(--emerald-600);
+  --color-accent-700: var(--emerald-700);
+  --color-accent-fg:  var(--emerald-300);
+  --color-accent-bg:  rgba(16, 185, 129, 0.12);
 
   /* Semantic */
   --color-success-fg:   var(--emerald-300);
@@ -431,7 +443,7 @@
   --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
   --shadow-xl: 0 24px 64px -16px rgba(0, 0, 0, 0.65);
-  --shadow-glow-accent:  0 0 0 4px rgba(129, 140, 248, 0.20);
+  --shadow-glow-accent:  0 0 0 4px rgba(52, 211, 153, 0.20);
   --shadow-glow-success: 0 0 0 4px rgba(52, 211, 153, 0.20);
 }
 
@@ -453,16 +465,16 @@
     --fg-2: var(--slate-200);
     --fg-3: var(--slate-400);
     --fg-4: var(--slate-500);
-    --fg-accent:    var(--indigo-400);
+    --fg-accent:    var(--emerald-400);
     --fg-on-accent: #FFFFFF;
     --border-subtle: rgba(148, 163, 184, 0.08);
     --border-card:   rgba(148, 163, 184, 0.12);
     --border-strong: rgba(148, 163, 184, 0.22);
-    --border-accent: var(--indigo-400);
-    --color-accent-500: var(--indigo-500);
-    --color-accent-600: var(--indigo-600);
-    --color-accent-fg:  var(--indigo-300);
-    --color-accent-bg:  rgba(99, 102, 241, 0.12);
+    --border-accent: var(--emerald-400);
+    --color-accent-500: var(--emerald-500);
+    --color-accent-600: var(--emerald-600);
+    --color-accent-fg:  var(--emerald-300);
+    --color-accent-bg:  rgba(16, 185, 129, 0.12);
     --color-success-fg:   var(--emerald-300);
     --color-success-dot:  var(--emerald-400);
     --color-success-bg:   rgba(16, 185, 129, 0.10);
@@ -483,7 +495,7 @@
     --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
     --shadow-xl: 0 24px 64px -16px rgba(0, 0, 0, 0.65);
-    --shadow-glow-accent:  0 0 0 4px rgba(129, 140, 248, 0.20);
+    --shadow-glow-accent:  0 0 0 4px rgba(52, 211, 153, 0.20);
   }
 }
 
