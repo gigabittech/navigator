@@ -71,3 +71,14 @@ verify_jwt = true
 #             VAPID_SUBJECT=mailto:alerts@navigator.app CRON_SECRET=...
 [functions.send_reminders]
 verify_jwt = false
+
+# Scheduler-invoked retention purge (x-cron-secret). Enforces the data-retention
+# matrix: waitlist 12mo, reports 2yr, voice transcripts 90d, rate-limit cleanup.
+# Schedule daily. Secrets: CRON_SECRET.
+[functions.purge_expired]
+verify_jwt = false
+
+# Browser-invoked account deletion (HIPAA right to delete). The gateway
+# authenticates; the function removes all server PHI but preserves the audit log.
+[functions.delete_account]
+verify_jwt = true

@@ -11,6 +11,7 @@ import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { formatDose } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/config";
 import { createBrowserClient } from "@/lib/auth/supabase";
+import { deleteServerAccount } from "@/lib/auth/deleteAccount";
 import { useAuthUser } from "@/lib/auth/useAuthUser";
 import { MedicationForm } from "./_components/MedicationForm";
 import { CoParents } from "./_components/CoParents";
@@ -82,6 +83,25 @@ export default function SettingsPage() {
   async function handleSignOut() {
     const supabase = createBrowserClient();
     await supabase.auth.signOut();
+    router.push("/sign-in");
+  }
+
+  async function handleDeleteAccount() {
+    if (
+      !window.confirm(
+        "Delete your account and all data? This can't be undone. Your data is removed from this device and the server.",
+      )
+    )
+      return;
+    setBusy(true);
+    // Server first: if it fails, keep the local copy rather than orphan the data.
+    const serverOk = await deleteServerAccount();
+    if (!serverOk) {
+      setBusy(false);
+      window.alert("Couldn't delete your account on the server. Your data is unchanged.");
+      return;
+    }
+    await resetLocalData(db);
     router.push("/sign-in");
   }
 
@@ -188,6 +208,17 @@ export default function SettingsPage() {
             <p className="text-sm text-fg-3">Local mode — data saved to this device only.</p>
           </Card>
         )}
+        <Card alt elevation="flat" className="p-4 flex flex-col gap-2">
+          <p className="text-sm text-fg-2">Delete your account</p>
+          <p className="text-2xs text-fg-4">
+            Removes all of your data from this device{isSupabaseConfigured() ? " and the server" : ""}. This can&rsquo;t be undone.
+          </p>
+          <div>
+            <Button variant="danger" size="sm" onClick={handleDeleteAccount} disabled={busy}>
+              {busy ? "Deleting…" : "Delete account and data"}
+            </Button>
+          </div>
+        </Card>
       </section>
     </div>
   );

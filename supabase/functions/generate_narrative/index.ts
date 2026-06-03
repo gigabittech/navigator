@@ -12,8 +12,11 @@
 // Secrets: supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 
 import { handlePreflight, isOriginAllowed, json } from "../_shared/cors.ts";
-import { getAuthedUser, isUuid, userCanAccessChild } from "../_shared/auth.ts";
+import { getAuthedUser, userCanAccessChild } from "../_shared/auth.ts";
 import { redact } from "../_shared/redact.ts";
+import { narrativeRequestSchema, parse } from "../_shared/validate.ts";
+import { checkRateLimit } from "../_shared/rateLimit.ts";
+import { appendAudit } from "../_shared/audit.ts";
 
 // deno-lint-ignore no-explicit-any
 type AnyReport = any;
@@ -63,12 +66,18 @@ Deno.serve(async (req) => {
     const user = await getAuthedUser(req);
     if (!user) return json(req, { error: "Not signed in." }, 401);
 
-    const body = await req.json().catch(() => null);
-    const report = body?.report;
-    const childId = body?.childId ?? report?.child?.id;
+    // Validate the whole request at the boundary (Zod). Rejects anything
+    // malformed — including a non-pseudonymized child object — with a generic 400.
+    const raw = await req.json().catch(() => null);
+    const validated = parse(narrativeRequestSchema, raw);
+    if (!validated.ok) return json(req, { error: "Invalid request." }, 400);
+    const { report, childId } = validated.data;
 
-    if (!report) return json(req, { error: "Missing report." }, 400);
-    if (!isUuid(childId)) return json(req, { error: "Missing or invalid child reference." }, 400);
+    // Rate limit the expensive Claude call: 10 per 5 minutes per user.
+    const rl = await checkRateLimit(user.id, "generate_narrative", 10, 300);
+    if (!rl.allowed) {
+      return json(req, { error: "Too many requests. Try again shortly." }, 429);
+    }
 
     // Authorize the payload against the caller — generic error, no leakage of
     // whether the child exists.
@@ -97,6 +106,15 @@ Deno.serve(async (req) => {
     }
     const data = await res.json();
     const narrative = data?.content?.[0]?.text?.trim() ?? "";
+
+    // Audit the PHI access (non-PII detail only).
+    await appendAudit({
+      actorId: user.id,
+      childId,
+      action: "report.generate",
+      detail: { ageRange: report.child?.ageRange, model: MODEL },
+    });
+
     return json(req, { narrative });
   } catch (err) {
     // Never echo internal error detail to the client, and redact before logging.
