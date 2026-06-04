@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { DbProvider } from "@/lib/db/provider";
-import { useChild } from "@/lib/db/queries/useChild";
+import { useChildState } from "@/lib/db/queries/useChild";
 import { AppChrome } from "./_components/AppChrome";
 
 /**
@@ -74,7 +74,7 @@ function GuardSkeleton() {
  */
 function FirstRunGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const child = useChild();
+  const { child, loaded } = useChildState();
 
   // Read the onboarded flag once on mount (localStorage isn't reactive, and it
   // only flips inside the onboarding flow, which lives on a different route).
@@ -98,10 +98,12 @@ function FirstRunGuard({ children }: { children: React.ReactNode }) {
 
   // Hold the skeleton until the flag is read and, for a fresh device, while the
   // redirect is in flight — so a never-onboarded user never sees the empty app.
-  // For an onboarded device we also wait on the first child row (`useChild()`
-  // resolves on its first tick) so the shell mounts with real data rather than
-  // flashing an empty sidebar.
-  if (!flagRead || needsOnboarding || child === undefined) {
+  // For an onboarded device we wait until the child query has RESOLVED (`loaded`)
+  // so the shell mounts with real data rather than flashing an empty sidebar.
+  // We must wait on `loaded`, NOT on `child` being present: a signed-in user who
+  // skipped setup legitimately has no child, and the app's empty states handle
+  // that — gating on `child === undefined` would hang the skeleton forever.
+  if (!flagRead || needsOnboarding || !loaded) {
     return <GuardSkeleton />;
   }
 
