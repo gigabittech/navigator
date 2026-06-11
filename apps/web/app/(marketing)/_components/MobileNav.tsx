@@ -35,6 +35,7 @@ const LINKS = [
   { href: "#report", label: "Clinical report" },
   { href: "#security", label: "Security" },
   { href: "#faq", label: "FAQ" },
+  { href: "/sign-in", label: "Sign in" },
 ];
 
 export function MobileNav() {

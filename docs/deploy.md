@@ -17,7 +17,6 @@ local-only mode with no credentials, so you can develop without Supabase.
 [ ] 7. Configure email (Resend → Supabase SMTP)
 [ ] 8. Push to GitHub; import in Vercel; set Vercel env vars (see §"Vercel")
 [ ] 9. Lock CORS:                   supabase secrets set ALLOWED_ORIGIN=https://<app>.vercel.app
-[ ] 10. (optional) Enable the /dev backdoor for the team (see §"Dev access")
 ```
 
 ---
@@ -121,15 +120,12 @@ user `resend`, password = your Resend API key, sender = `hello@yourdomain.com`.
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase → API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Supabase → API (safe to expose) |
-| `SUPABASE_SERVICE_ROLE_KEY` | yes | server-only; waitlist writes + dev login. NEVER `NEXT_PUBLIC` |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | server-only; waitlist writes. NEVER `NEXT_PUBLIC` |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | for push | public half of the VAPID pair |
 | `RESEND_API_KEY` | optional | waitlist confirmation emails |
 | `WAITLIST_FROM` | optional | sender identity |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | optional | cookieless analytics (GPC-gated) |
 | `NEXT_PUBLIC_ELECTRIC_URL` | optional | Electric streaming-sync upgrade only. Base two-way sync (pull on sign-in + periodic push) runs on plain Supabase with no extra config. |
-| `DEV_LOGIN_ENABLED` | dev only | `true` to enable `/dev`. Leave unset in prod |
-| `DEV_LOGIN_SECRET` | dev only | random string the `/dev` form requires |
-| `DEV_LOGIN_EMAIL` | dev only | the dev user's email |
 
 Do **not** put `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `VAPID_PRIVATE_KEY` /
 `CRON_SECRET` in Vercel — those live in Supabase Edge Function secrets.
@@ -139,19 +135,13 @@ headers (CSP, HSTS, COOP/COEP, X-Frame, Referrer) ship from `next.config.mjs`.
 
 ---
 
-## Dev access (the `/dev` backdoor)
+## Signing in
 
-The marketing site exposes only "Join the waitlist" — there is no public link
-into the app. For the team, `/dev` gives single-click login:
-
-- Set `DEV_LOGIN_ENABLED=true`, `DEV_LOGIN_SECRET=<random>`,
-  `DEV_LOGIN_EMAIL=<email>` (server-only) in Vercel (or `.env.local`).
-- Visit `/dev`, enter the secret → it mints a **real** Supabase session for the
-  dev user (via the service role; no OTP email) and lands on `/today`. The
-  session is a normal authenticated session — middleware, RLS, and the edge
-  functions all trust it.
-- In real production, leave `DEV_LOGIN_ENABLED` **unset**: `/dev` returns 404 and
-  the action is inert. Rotate `DEV_LOGIN_SECRET` if it leaks.
+The marketing site's "Sign in" link goes to `/sign-in` — passwordless email
+OTP via Supabase Auth (enter your email, type the 6-digit code from the
+message). New users get a `profiles` row automatically (the `handle_new_user`
+trigger) and are routed through onboarding on first sign-in. Sign out lives in
+Settings.
 
 ---
 

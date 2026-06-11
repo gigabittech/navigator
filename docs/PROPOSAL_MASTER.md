@@ -354,15 +354,14 @@ the start, not retrofitted.
   JWT flags and prints the secret + cron checklist.
 - `docs/deploy.md` — full runbook: one-shot checklist, all secrets
   (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `ALLOWED_ORIGIN`, `VAPID_*`,
-  `CRON_SECRET`, `DEV_LOGIN_*`), the two cron schedules, and the Vercel env table.
+  `CRON_SECRET`), the two cron schedules, and the Vercel env table.
 
-### Dev access (the `/dev` backdoor)
-The marketing site exposes only "Join the waitlist" — there is no public link
-into the app. For the team, the hidden **`/dev`** route provides single-click
-login: it mints a real Supabase session for a fixed dev user via the service
-role (no OTP email), landing on `/today`. It is **fail-closed** — a hard 404
-unless `DEV_LOGIN_ENABLED` + `DEV_LOGIN_SECRET` + `DEV_LOGIN_EMAIL` are set
-(server-only). In real production those stay unset and the door does not exist.
+### Production entry (sign in from the marketing site)
+The marketing site links to **`/sign-in`** — passwordless email OTP via
+Supabase Auth. New users get a `profiles` row automatically (the
+`handle_new_user` trigger) and are routed through onboarding on first sign-in;
+sign out lives in Settings. The earlier `/dev` backdoor has been removed —
+production behavior is the only behavior.
 
 ### Local mode
 With no Supabase credentials, the app runs fully on-device: auth gate disabled,
@@ -510,7 +509,7 @@ an onboarding tour (the product should be obvious enough not to need one).
 **Client (NEXT_PUBLIC):** `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
 `VAPID_PUBLIC_KEY`, `PLAUSIBLE_DOMAIN`, `ELECTRIC_URL` (deferred).
 **Server (Vercel):** `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`,
-`WAITLIST_FROM`, `DEV_LOGIN_ENABLED`, `DEV_LOGIN_SECRET`, `DEV_LOGIN_EMAIL`.
+`WAITLIST_FROM`.
 **Edge Function secrets (Supabase):** `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
 `ALLOWED_ORIGIN`, `CRON_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
 `VAPID_SUBJECT`.
