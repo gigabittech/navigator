@@ -184,11 +184,13 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 .btn-ghost:hover { background: rgba(14, 27, 48, 0.04); }
 .section--dark .btn-ghost,
+.nav .btn-ghost,
 .hero .btn-ghost {
   color: var(--fg-on-dark-1);
   border-color: var(--border-on-dark);
 }
 .section--dark .btn-ghost:hover,
+.nav .btn-ghost:hover,
 .hero .btn-ghost:hover { background: rgba(252, 251, 246, 0.06); }
 
 .btn-text {
@@ -262,11 +264,12 @@ h1, h2, h3, h4, p { margin: 0; }
   .nav-links { display: inline-flex; }
 }
 .nav .btn { min-height: 40px; padding: 10px 18px; font-size: var(--text-sm); }
-/* Below 880px the header CTA is redundant with the mobile menu's waitlist
-   link and crowds the row (overflow). Hide it; the hamburger takes over. */
-.nav-inner > .btn-primary { display: none; }
+/* Sign in + Get started travel as one tight pair on the right. Below 880px the
+   pair is redundant with the mobile menu (which carries both) and would crowd
+   the row — hide it; the hamburger takes over. */
+.nav-actions { display: none; align-items: center; gap: 10px; }
 @media (min-width: 880px) {
-  .nav-inner > .btn-primary { display: inline-flex; }
+  .nav-actions { display: inline-flex; }
 }
 
 /* ── Mobile nav (320–879px) ────────────────────────────────── */

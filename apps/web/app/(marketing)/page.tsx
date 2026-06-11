@@ -62,12 +62,14 @@ function Nav() {
           <a href="#security">Security</a>
           <a href="#faq">FAQ</a>
         </nav>
-        <a href="/sign-in" className="btn btn-ghost">
-          Sign in
-        </a>
-        <a href="/sign-in" className="btn btn-primary">
-          Get started <Icon name="arrow-right" size={16} />
-        </a>
+        <div className="nav-actions">
+          <a href="/sign-in" className="btn btn-ghost">
+            Sign in
+          </a>
+          <a href="/sign-in" className="btn btn-primary">
+            Get started <Icon name="arrow-right" size={16} />
+          </a>
+        </div>
         <MobileNav />
       </div>
     </header>
