@@ -126,6 +126,7 @@ user `resend`, password = your Resend API key, sender = `hello@yourdomain.com`.
 | `WAITLIST_FROM` | optional | sender identity |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | optional | cookieless analytics (GPC-gated) |
 | `NEXT_PUBLIC_ELECTRIC_URL` | optional | Electric streaming-sync upgrade only. Base two-way sync (pull on sign-in + periodic push) runs on plain Supabase with no extra config. |
+| `PREVIEW_PASSWORD` | pre-launch | one shared password gating the WHOLE site (/preview-access). Unset it to launch publicly |
 
 Do **not** put `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `VAPID_PRIVATE_KEY` /
 `CRON_SECRET` in Vercel — those live in Supabase Edge Function secrets.

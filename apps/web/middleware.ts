@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { isSupabaseConfigured } from "@/lib/config";
+import { PREVIEW_COOKIE, isPreviewGateEnabled, previewCookieValue } from "@/lib/auth/preview";
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
@@ -85,6 +86,26 @@ export async function middleware(request: NextRequest) {
   };
 
   const { pathname } = request.nextUrl;
+
+  // Private-preview curtain: until launch, the whole site (marketing + app)
+  // requires the shared preview password. Exempt the gate page itself and the
+  // auth callback (magic-link emails must keep working on un-gated devices);
+  // static assets never reach middleware (see config.matcher). Unset
+  // PREVIEW_PASSWORD and this block is inert.
+  if (isPreviewGateEnabled()) {
+    const exempt = pathname === "/preview-access" || pathname.startsWith("/auth/");
+    if (!exempt) {
+      const granted = request.cookies.get(PREVIEW_COOKIE)?.value;
+      if (granted !== (await previewCookieValue())) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/preview-access";
+        url.search = "";
+        if (pathname !== "/") url.searchParams.set("from", pathname);
+        return withCsp(NextResponse.redirect(url));
+      }
+    }
+  }
+
   const isAppRoute = APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   // Non-app routes (and local mode) just pass through — but still carry the CSP.

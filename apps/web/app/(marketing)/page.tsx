@@ -1,6 +1,5 @@
 import "./marketing.css";
 import Link from "next/link";
-import { WaitlistForm } from "./waitlist/_components/WaitlistForm";
 import { MobileNav } from "./_components/MobileNav";
 
 /* ── Inline SVG icons (Lucide subset matching the design) ── */
@@ -66,8 +65,8 @@ function Nav() {
         <a href="/sign-in" className="btn btn-ghost">
           Sign in
         </a>
-        <a href="#waitlist" className="btn btn-primary">
-          Join the waitlist <Icon name="arrow-right" size={16} />
+        <a href="/sign-in" className="btn btn-primary">
+          Get started <Icon name="arrow-right" size={16} />
         </a>
         <MobileNav />
       </div>
@@ -187,7 +186,7 @@ function Hero() {
       <div className="container hero-grid">
         <div>
           <span className="hero-pill">
-            <span className="live"></span> Closed beta · summer 2026
+            <span className="live"></span> Private preview
           </span>
           <h1>
             Take back control of your child&rsquo;s{" "}
@@ -199,8 +198,8 @@ function Hero() {
             observations — and walk into every appointment prepared.
           </p>
           <div className="hero-cta">
-            <a href="#waitlist" className="btn btn-primary btn-lg">
-              Join the waitlist <Icon name="arrow-right" size={18} />
+            <a href="/sign-in" className="btn btn-primary btn-lg">
+              Get started <Icon name="arrow-right" size={18} />
             </a>
             <a href="#report" className="btn btn-ghost btn-lg">See a sample report</a>
           </div>
@@ -614,7 +613,7 @@ function FAQ() {
     { q: "Does it work offline?", a: "Yes — completely. Navigator is a local-first PWA. Every dose, observation, and event saves instantly to your device. When you're back online, it syncs quietly in the background. You'll never lose a log because you were on the subway." },
     { q: "Is my child's data private?", a: "Yes. Data is encrypted at rest on your device and end-to-end encrypted in transit. We sign Business Associate Agreements with our infrastructure providers. We don't sell data, and your child's logs never train an AI model." },
     { q: "Can my co-parent or caregiver use it too?", a: "Yes. You can invite a co-parent, grandparent, or caregiver to a shared child profile. Everyone sees the same context, logs to the same timeline, and walks into the appointment with the same questions." },
-    { q: "When will I get access?", a: "Closed beta opens summer 2026 with 50 families. Join the waitlist below — we'll email you before your slot is ready. No marketing list, no spam, one email when it's time." },
+    { q: "How do I get access?", a: "Navigator is in a private preview. Once you're in, create your account with just your email — a 6-digit code signs you in. No password to remember." },
     { q: "How much will Navigator cost?", a: "During beta, Navigator is free. We'll announce pricing before the beta period ends, with plenty of notice for families to decide. Founding-family pricing will be honored long-term." },
   ];
   return (
@@ -642,17 +641,19 @@ function FAQ() {
 /* ── Final CTA ── */
 function FinalCTA() {
   return (
-    <section className="cta" id="waitlist">
+    <section className="cta" id="get-started">
       <div className="container cta-inner">
         <h2>
           You will never have to <span className="it">reconstruct</span>
           <br />your child&rsquo;s story from memory again.
         </h2>
-        <p>Closed beta opens summer 2026. We&rsquo;re onboarding our first 50 families.</p>
-        <WaitlistForm inline />
+        <p>Create your account with your email — a one-time code signs you in. Start logging in under a minute.</p>
+        <a href="/sign-in" className="btn btn-primary btn-lg">
+          Get started <Icon name="arrow-right" size={18} />
+        </a>
         <div className="disclaimer">
           Navigator does not diagnose, prescribe, or treat. For clinical decisions, always
-          consult your child&rsquo;s provider. We email once, before beta opens. No marketing list.
+          consult your child&rsquo;s provider.
         </div>
       </div>
     </section>
@@ -688,7 +689,7 @@ function Footer() {
               <li><Link href="/about">About</Link></li>
               <li><Link href="/story">Story</Link></li>
               <li><a href="mailto:hello@getnavigator.app">Contact</a></li>
-              <li><a href="#waitlist">Join the waitlist</a></li>
+              <li><a href="/sign-in">Get started</a></li>
             </ul>
           </div>
           <div className="footer-col">
