@@ -436,9 +436,14 @@ change. All work is committed with conventional-commit messages.
 ## 13. What is planned
 
 ### Phase 2 — activation (built, needs a live environment)
-- **Cross-device sync** — activate the Electric read-shapes → PGlite path; needs
-  a running Electric service and a PGlite 0.3 → 0.4 upgrade (a separate,
-  browser-verified step). The writes-through outbox and sync-state UI are done.
+- **Cross-device sync — BASE PATH SHIPPED.** A two-way Supabase data link is
+  built and wired (`lib/sync/supabase-sync.ts`): on sign-in the device pulls the
+  full care record down under the user's own RLS, then pushes locally-authored
+  rows up (boot round trip + 30-second steady-state push). A fresh device picks
+  up the whole record; events logged on one device land on the next. The
+  **Electric streaming upgrade** (live read-shapes, real conflict resolution)
+  remains the Phase 2 enhancement; it needs a running Electric service and a
+  PGlite 0.3 → 0.4 upgrade (a separate, browser-verified step).
 - **Co-parent sharing** — wire the real invite-send (the UI, attribution, table,
   and RLS are built; cross-device delivery arrives with sync).
 - **Dose-reminder push** — activate `send_reminders` (needs VAPID keys + a cron

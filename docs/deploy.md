@@ -126,7 +126,7 @@ user `resend`, password = your Resend API key, sender = `hello@yourdomain.com`.
 | `RESEND_API_KEY` | optional | waitlist confirmation emails |
 | `WAITLIST_FROM` | optional | sender identity |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | optional | cookieless analytics (GPC-gated) |
-| `NEXT_PUBLIC_ELECTRIC_URL` | optional | cross-device sync (deferred) |
+| `NEXT_PUBLIC_ELECTRIC_URL` | optional | Electric streaming-sync upgrade only. Base two-way sync (pull on sign-in + periodic push) runs on plain Supabase with no extra config. |
 | `DEV_LOGIN_ENABLED` | dev only | `true` to enable `/dev`. Leave unset in prod |
 | `DEV_LOGIN_SECRET` | dev only | random string the `/dev` form requires |
 | `DEV_LOGIN_EMAIL` | dev only | the dev user's email |
