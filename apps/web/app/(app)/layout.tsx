@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { DbProvider } from "@/lib/db/provider";
 import { useChildState } from "@/lib/db/queries/useChild";
+import { useSyncPhase } from "@/lib/sync/store";
+import { isSupabaseConfigured } from "@/lib/config";
 import { AppChrome } from "./_components/AppChrome";
 
 /**
@@ -75,6 +77,7 @@ function GuardSkeleton() {
 function FirstRunGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { child, loaded } = useChildState();
+  const syncPhase = useSyncPhase();
 
   // Read the onboarded flag once on mount (localStorage isn't reactive, and it
   // only flips inside the onboarding flow, which lives on a different route).
@@ -85,10 +88,28 @@ function FirstRunGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   const flagRead = onboarded !== null;
-  // A device the user has never completed *or* skipped onboarding on. The flag
-  // is authoritative and takes strict precedence: an onboarded device is never
-  // redirected, even during the tick before `useChild()` resolves.
-  const needsOnboarding = flagRead && onboarded === false;
+
+  // On a Supabase-linked device the boot pull may still be hydrating a fresh
+  // device's record. Only when the device has NO child yet does the pull change
+  // the first-run decision — returning users with local data are never held.
+  const syncSettling =
+    isSupabaseConfigured() && (syncPhase === "idle" || syncPhase === "starting");
+  const waitingForFirstPull = syncSettling && loaded && !child;
+
+  // A child arriving without the flag means onboarding was completed on
+  // another device (the record just synced down) — adopt it, don't re-onboard.
+  useEffect(() => {
+    if (flagRead && onboarded === false && loaded && child) {
+      window.localStorage.setItem("navigator.onboarded", "true");
+      setOnboarded(true);
+    }
+  }, [flagRead, onboarded, loaded, child]);
+
+  // A device the user has never completed *or* skipped onboarding on, with no
+  // synced record either. The flag takes precedence: an onboarded device is
+  // never redirected, even during the tick before `useChild()` resolves.
+  const needsOnboarding =
+    flagRead && onboarded === false && loaded && !child && !syncSettling;
 
   useEffect(() => {
     if (needsOnboarding) {
@@ -96,14 +117,11 @@ function FirstRunGuard({ children }: { children: React.ReactNode }) {
     }
   }, [needsOnboarding, router]);
 
-  // Hold the skeleton until the flag is read and, for a fresh device, while the
-  // redirect is in flight — so a never-onboarded user never sees the empty app.
-  // For an onboarded device we wait until the child query has RESOLVED (`loaded`)
-  // so the shell mounts with real data rather than flashing an empty sidebar.
-  // We must wait on `loaded`, NOT on `child` being present: a signed-in user who
-  // skipped setup legitimately has no child, and the app's empty states handle
-  // that — gating on `child === undefined` would hang the skeleton forever.
-  if (!flagRead || needsOnboarding || !loaded) {
+  // Hold the skeleton until: the flag is read; the child query has RESOLVED
+  // (`loaded` — NOT child-present: a user who skipped setup legitimately has no
+  // child and the empty states handle it); the first pull settled on a fresh
+  // device; and, for a never-onboarded device, while the redirect is in flight.
+  if (!flagRead || needsOnboarding || !loaded || waitingForFirstPull) {
     return <GuardSkeleton />;
   }
 

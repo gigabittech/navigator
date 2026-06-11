@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePGlite } from "@electric-sql/pglite-react";
 import { addMedication } from "@/lib/db/mutations/medications";
+import { createBrowserClient } from "@/lib/auth/supabase";
+import { isSupabaseConfigured } from "@/lib/config";
 
 interface OnboardingChild {
   name: string;
@@ -103,12 +105,36 @@ export default function DonePage() {
       );
     } else {
       // No seed ran yet — create profile + child from scratch.
+      //
+      // When signed in, the LOCAL profile id MUST be the Supabase user id:
+      // server RLS only accepts pushed rows where owner_id / logged_by equals
+      // auth.uid(), so aligning ids here is what makes the device↔server sync
+      // (lib/sync/supabase-sync.ts) work. Local-only mode keeps a
+      // self-contained random id, exactly as before.
+      let sessionUser: { id: string; email: string } | null = null;
+      if (isSupabaseConfigured()) {
+        try {
+          const {
+            data: { session },
+          } = await createBrowserClient().auth.getSession();
+          if (session?.user) {
+            sessionUser = {
+              id: session.user.id,
+              email: session.user.email ?? "parent@navigator.local",
+            };
+          }
+        } catch {
+          // Offline at setup time — fall through to a local id; data stays on
+          // this device until a future session can reconcile.
+        }
+      }
+
       const profileRes = await db.query<{ id: string }>(
-        `INSERT INTO profiles (email, full_name, role)
-         VALUES ($1, $2, 'parent')
+        `INSERT INTO profiles (id, email, full_name, role)
+         VALUES (COALESCE($1::uuid, gen_random_uuid()), $2, $3, 'parent')
          ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name
          RETURNING id`,
-        ["parent@navigator.local", "Parent"],
+        [sessionUser?.id ?? null, sessionUser?.email ?? "parent@navigator.local", "Parent"],
       );
       profileId = profileRes.rows[0]!.id;
 
