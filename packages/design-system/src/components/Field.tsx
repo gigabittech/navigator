@@ -49,7 +49,11 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
           aria-describedby={hint || error ? describedById : undefined}
           className={cn(
             "flex-1 bg-transparent px-3 text-base text-fg-1 placeholder:text-fg-4",
-            "rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-accent",
+            // No ring on the bare input: the focus indication lives on the
+            // 48px wrapper (focus-within border + glow above). An inner ring
+            // hugs the short text element and reads as a shrunken second
+            // outline floating inside the field.
+            "focus-visible:outline-none",
             className,
           )}
           {...rest}
