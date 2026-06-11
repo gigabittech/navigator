@@ -5,7 +5,9 @@ import { unlock } from "./_actions";
 import "../marketing.css";
 
 export const metadata: Metadata = {
-  title: "Private preview — Navigator",
+  // Unbranded on purpose — `absolute` opts out of the root layout's
+  // "%s · Navigator" template so the tab title reveals nothing either.
+  title: { absolute: "Private preview" },
   robots: { index: false, follow: false },
 };
 
@@ -38,30 +40,13 @@ export default function PreviewAccessPage({
       }}
     >
       <div style={{ width: "100%", maxWidth: 380, textAlign: "center" }}>
-        <div
-          aria-hidden
-          style={{
-            width: 44,
-            height: 44,
-            margin: "0 auto 16px",
-            borderRadius: 12,
-            background: "var(--color-accent-500, #10B981)",
-            color: "var(--fg-on-accent, #FFFFFF)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 700,
-            fontSize: 22,
-          }}
-        >
-          N
-        </div>
+        {/* Deliberately unbranded: the gate gives nothing away about what's
+            behind it. No product name, no logo. */}
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--fg-1, #0F172A)", marginBottom: 8 }}>
-          Navigator is in private preview
+          Private preview
         </h1>
         <p style={{ fontSize: 14, color: "var(--fg-3, #64748B)", marginBottom: 24, lineHeight: 1.5 }}>
-          This early version isn&rsquo;t public yet. Enter the preview password to
-          see the site and try the app.
+          This site isn&rsquo;t public yet. Enter the access password to continue.
         </p>
 
         <form action={unlock} style={{ display: "grid", gap: 10 }}>
