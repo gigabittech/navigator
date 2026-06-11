@@ -93,11 +93,11 @@ export function MobileNav() {
             </a>
           ))}
           <a
-            href="#waitlist"
+            href="/sign-in"
             className="mobile-nav-cta"
             onClick={() => setOpen(false)}
           >
-            Join the waitlist
+            Get started
           </a>
         </nav>
       </div>
