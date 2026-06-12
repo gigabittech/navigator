@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import type { PGliteInterface } from "@electric-sql/pglite";
 import { usePGlite } from "@electric-sql/pglite-react";
 import { Card } from "@navigator/design-system/components";
-import { useChild } from "@/lib/db/queries/useChild";
+import Link from "next/link";
+import { useChildState } from "@/lib/db/queries/useChild";
 import { useTodayDoses } from "@/lib/db/queries/useTodayDoses";
 import { logObservation } from "@/lib/db/mutations/logObservation";
 import { DoseCard } from "./_components/DoseCard";
@@ -49,7 +50,7 @@ type ActiveOverlay = "sheet" | "voice" | "tags" | "school" | null;
  * the local PGlite database; updates are instant.
  */
 export default function TodayPage() {
-  const child = useChild();
+  const { child, loaded: childLoaded } = useChildState();
   const { slots, loading } = useTodayDoses(child?.id);
   const db = usePGlite();
 
@@ -68,14 +69,31 @@ export default function TodayPage() {
           <h1 className="text-2xl font-bold tracking-tight">{greeting}</h1>
         </header>
 
-        {loading ? (
+        {childLoaded && !child ? (
+          <Card alt>
+            <p className="text-sm text-fg-2 mb-3">
+              No child profile on this device yet. Set one up to start logging —
+              it takes under a minute.
+            </p>
+            <Link
+              href="/onboarding/child"
+              className="inline-flex min-h-tap items-center rounded-lg bg-accent-600 px-4 text-sm font-semibold text-fg-on-accent hover:bg-accent-700 transition-colors duration-fast"
+            >
+              Set up your child
+            </Link>
+          </Card>
+        ) : loading ? (
           <Card alt>
             <p className="text-sm text-fg-3">Loading today&rsquo;s doses…</p>
           </Card>
         ) : slots.length === 0 ? (
           <Card alt>
             <p className="text-sm text-fg-3">
-              No medications scheduled. Add one in settings to start logging doses.
+              No medications scheduled.{" "}
+              <Link href="/settings#medications" className="text-accent-700 underline-offset-2 hover:underline">
+                Add one in settings
+              </Link>{" "}
+              to start logging doses.
             </p>
           </Card>
         ) : (
@@ -84,17 +102,21 @@ export default function TodayPage() {
           ))
         )}
 
-        {/* Wear-off pattern alert — only renders when a pattern is detected */}
-        <PatternCard />
+        {child ? (
+          <>
+            {/* Wear-off pattern alert — only renders when a pattern is detected */}
+            <PatternCard />
 
-        {/* Quick-add 2×2 grid — shortcuts to the observation composer and voice note */}
-        <QuickAddGrid />
+            {/* Quick-add 2×2 grid — shortcuts to the observation composer and voice note */}
+            <QuickAddGrid />
 
-        {/* Next visit strip — shown when an appointment is within 14 days */}
-        <NextVisitBanner />
+            {/* Next visit strip — shown when an appointment is within 14 days */}
+            <NextVisitBanner />
 
-        <ObservationComposer />
-        <VoiceNote />
+            <ObservationComposer />
+            <VoiceNote />
+          </>
+        ) : null}
       </div>
 
       {/* FAB — sits above tab bar, below overlays */}

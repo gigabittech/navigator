@@ -96,6 +96,18 @@ function FirstRunGuard({ children }: { children: React.ReactNode }) {
     isSupabaseConfigured() && (syncPhase === "idle" || syncPhase === "starting");
   const waitingForFirstPull = syncSettling && loaded && !child;
 
+  // The hold is BOUNDED: on a slow connection an unfinished pull must not pin
+  // a fresh device on the skeleton forever. After the cap we proceed with
+  // local state — safe, because onboarding's final step reuses an existing
+  // child if one arrives mid-flow rather than creating a duplicate.
+  const [pullWaitExpired, setPullWaitExpired] = useState(false);
+  useEffect(() => {
+    if (!waitingForFirstPull) return;
+    const t = setTimeout(() => setPullWaitExpired(true), 10_000);
+    return () => clearTimeout(t);
+  }, [waitingForFirstPull]);
+  const holdForPull = waitingForFirstPull && !pullWaitExpired;
+
   // A child arriving without the flag means onboarding was completed on
   // another device (the record just synced down) — adopt it, don't re-onboard.
   useEffect(() => {
@@ -109,7 +121,11 @@ function FirstRunGuard({ children }: { children: React.ReactNode }) {
   // synced record either. The flag takes precedence: an onboarded device is
   // never redirected, even during the tick before `useChild()` resolves.
   const needsOnboarding =
-    flagRead && onboarded === false && loaded && !child && !syncSettling;
+    flagRead &&
+    onboarded === false &&
+    loaded &&
+    !child &&
+    (!syncSettling || pullWaitExpired);
 
   useEffect(() => {
     if (needsOnboarding) {
@@ -120,8 +136,9 @@ function FirstRunGuard({ children }: { children: React.ReactNode }) {
   // Hold the skeleton until: the flag is read; the child query has RESOLVED
   // (`loaded` — NOT child-present: a user who skipped setup legitimately has no
   // child and the empty states handle it); the first pull settled on a fresh
-  // device; and, for a never-onboarded device, while the redirect is in flight.
-  if (!flagRead || needsOnboarding || !loaded || waitingForFirstPull) {
+  // device (bounded — see above); and, for a never-onboarded device, while the
+  // redirect is in flight.
+  if (!flagRead || needsOnboarding || !loaded || holdForPull) {
     return <GuardSkeleton />;
   }
 

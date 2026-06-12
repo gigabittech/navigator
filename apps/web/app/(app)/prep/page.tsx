@@ -12,7 +12,7 @@ import {
 import { usePGlite, useLiveQuery } from "@electric-sql/pglite-react";
 import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
 import { useTimeline } from "@/lib/db/queries/useTimeline";
-import { useChild } from "@/lib/db/queries/useChild";
+import { useChild, useChildState } from "@/lib/db/queries/useChild";
 import { formatClock } from "@/lib/time";
 import { APPOINTMENT_COLUMNS } from "@/lib/db/sql";
 import type { AppointmentRow } from "@/lib/db/types";
@@ -387,6 +387,7 @@ function AddAppointmentForm({ onSaved }: { onSaved: () => void }) {
 /* ── Upcoming appointments list ── */
 
 function UpcomingAppointments() {
+  const { child, loaded: childLoaded } = useChildState();
   const db = usePGlite();
   const [showForm, setShowForm] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -430,7 +431,7 @@ function UpcomingAppointments() {
         >
           Upcoming appointments
         </p>
-        {!showForm ? (
+        {!showForm && child ? (
           <button
             type="button"
             onClick={() => setShowForm(true)}
@@ -451,7 +452,15 @@ function UpcomingAppointments() {
         <AddAppointmentForm onSaved={handleSaved} />
       ) : null}
 
-      {appointments.length === 0 && !showForm ? (
+      {childLoaded && !child ? (
+        <p className="text-sm text-fg-3">
+          Set up your child&rsquo;s profile in{" "}
+          <Link href="/settings" className="text-accent-700 underline-offset-2 hover:underline">
+            settings
+          </Link>{" "}
+          to start adding appointments.
+        </p>
+      ) : appointments.length === 0 && !showForm ? (
         <p className="text-sm text-fg-3">
           No upcoming appointments. Add one to start preparing.
         </p>

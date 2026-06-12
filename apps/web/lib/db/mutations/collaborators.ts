@@ -25,6 +25,12 @@ export async function inviteCollaborator(
   childId: string,
   email: string,
   role: CollaboratorRole,
+  /**
+   * The invitee's REAL server user id, when the server invite ran first.
+   * Aligning ids means this local row and the synced row are the same person;
+   * without it (local mode) a self-contained random id is used.
+   */
+  knownCollaboratorId?: string,
 ): Promise<InviteResult> {
   const trimmed = email.trim().toLowerCase();
   if (!EMAIL_RE.test(trimmed)) {
@@ -37,7 +43,7 @@ export async function inviteCollaborator(
      VALUES ($1, $2, $3)
      ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
      RETURNING id`,
-    [crypto.randomUUID(), trimmed, role],
+    [knownCollaboratorId ?? crypto.randomUUID(), trimmed, role],
   );
   const collaboratorId = profileRes.rows[0]!.id;
 

@@ -25,11 +25,17 @@ function isProd(): boolean {
   return env === "production" || env === "prod";
 }
 
+// The known production origin ships as a built-in default so the deployed app
+// works without a separate secrets step; ALLOWED_ORIGIN extends (not replaces)
+// it for previews/staging.
+const DEFAULT_ALLOWED_ORIGINS = ["https://navigator.novasapienlabs.com"];
+
 function configuredOrigins(): string[] {
-  return (Deno.env.get("ALLOWED_ORIGIN") ?? "")
+  const fromEnv = (Deno.env.get("ALLOWED_ORIGIN") ?? "")
     .split(",")
     .map((o) => o.trim())
     .filter((o) => o.length > 0);
+  return [...DEFAULT_ALLOWED_ORIGINS, ...fromEnv];
 }
 
 function isLocalhost(origin: string): boolean {

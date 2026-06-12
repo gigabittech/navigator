@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { usePGlite } from "@electric-sql/pglite-react";
 import { Button, Card, Pill } from "@navigator/design-system/components";
 import { useMedications } from "@/lib/db/queries/useMedications";
-import { useChild } from "@/lib/db/queries/useChild";
+import Link from "next/link";
+import { useChildState } from "@/lib/db/queries/useChild";
 import { resetLocalData, stopMedication } from "@/lib/db/mutations/medications";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { formatDose } from "@/lib/format";
@@ -20,7 +21,7 @@ import { TwoFactor } from "./_components/TwoFactor";
 
 export default function SettingsPage() {
   const db = usePGlite();
-  const child = useChild();
+  const { child, loaded: childLoaded } = useChildState();
   const meds = useMedications();
   const user = useAuthUser();
   const router = useRouter();
@@ -110,7 +111,30 @@ export default function SettingsPage() {
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
 
-      <section className="flex flex-col gap-3">
+      {/* Child profile — and the way back into setup if it was skipped. */}
+      <section id="child" className="flex flex-col gap-3 scroll-mt-20">
+        <h2 className="text-sm font-semibold text-fg-2">Child profile</h2>
+        {child ? (
+          <Card alt elevation="flat" className="p-4">
+            <p className="font-medium text-fg-1">{child.preferredName}</p>
+            <p className="text-xs text-fg-3 mt-1">
+              Medications, logs, and reports all belong to this profile.
+            </p>
+          </Card>
+        ) : (
+          <Card alt elevation="flat" className="p-4">
+            <p className="text-sm text-fg-2 mb-3">
+              No child profile yet. Set one up to start logging doses and
+              observations.
+            </p>
+            <Link href="/onboarding/child">
+              <Button size="sm">Set up your child</Button>
+            </Link>
+          </Card>
+        )}
+      </section>
+
+      <section id="medications" className="flex flex-col gap-3 scroll-mt-20">
         <h2 className="text-sm font-semibold text-fg-2">Medications</h2>
         {meds.length === 0 ? (
           <Card alt>
@@ -140,7 +164,13 @@ export default function SettingsPage() {
             </Card>
           ))
         )}
-        <MedicationForm />
+        {child ? (
+          <MedicationForm />
+        ) : childLoaded ? (
+          <p className="text-sm text-fg-3">
+            Set up your child&rsquo;s profile above to add medications.
+          </p>
+        ) : null}
       </section>
 
       <CoParents childId={child?.id} />

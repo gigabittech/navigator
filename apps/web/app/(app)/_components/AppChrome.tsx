@@ -1,25 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   CalendarCheck,
-  ChevronDown,
   ClipboardList,
   FileText,
   ListOrdered,
+  LogOut,
   Pill,
+  Plus,
   Search,
   Settings,
   TrendingUp,
   Users,
 } from "lucide-react";
 import { SyncDot } from "@navigator/design-system/components";
-import { useChild } from "@/lib/db/queries/useChild";
+import { useChildState } from "@/lib/db/queries/useChild";
 import { useNextAppointment } from "@/lib/db/queries/useNextAppointment";
 import { useAuthUser } from "@/lib/auth/useAuthUser";
 import { useSyncState } from "@/lib/auth/useSyncState";
+import { createBrowserClient } from "@/lib/auth/supabase";
 import { isSupabaseConfigured } from "@/lib/config";
 
 /* ── Bottom tab bar (mobile only) ─────────────────────────── */
@@ -87,9 +89,15 @@ function getInitials(name: string): string {
 /* ── Sidebar ──────────────────────────────────────────────── */
 
 function DesktopSidebar({ pathname }: { pathname: string }) {
-  const child = useChild();
+  const router = useRouter();
+  const { child, loaded: childLoaded } = useChildState();
   const nextAppt = useNextAppointment(child?.id);
   const authUser = useAuthUser();
+
+  async function handleSignOut() {
+    await createBrowserClient().auth.signOut();
+    router.push("/sign-in");
+  }
 
   const apptDate =
     nextAppt?.scheduledFor && isWithin14Days(new Date(nextAppt.scheduledFor))
@@ -180,26 +188,51 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
         Navigator
       </div>
 
-      {/* Child switcher */}
-      <div
-        className="flex items-center gap-2.5 px-3 py-2.5 mb-4 rounded-[12px] cursor-pointer
-                   bg-surface-sidebar-raised border border-on-dark"
-      >
-        <span
-          className="w-8 h-8 rounded-full grid place-items-center text-fg-on-dark text-xs font-bold shrink-0"
-          style={{ background: "var(--gradient-brand-glyph-135)" }}
-          aria-hidden
+      {/* Child block. With a child: their identity. Without one (setup was
+          skipped): the way back in — links straight to child setup. */}
+      {child ? (
+        <div
+          className="flex items-center gap-2.5 px-3 py-2.5 mb-4 rounded-[12px]
+                     bg-surface-sidebar-raised border border-on-dark"
         >
-          {childInitials}
-        </span>
-        <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-semibold text-fg-on-dark truncate">
-            {child?.preferredName ?? "Loading…"}
+          <span
+            className="w-8 h-8 rounded-full grid place-items-center text-fg-on-dark text-xs font-bold shrink-0"
+            style={{ background: "var(--gradient-brand-glyph-135)" }}
+            aria-hidden
+          >
+            {childInitials}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-semibold text-fg-on-dark truncate">
+              {child.preferredName}
+            </div>
+            <div className="text-[11px] mt-0.5 text-fg-on-dark-faint">Your child</div>
           </div>
-          <div className="text-[11px] mt-0.5 text-fg-on-dark-faint">Your child</div>
         </div>
-        <ChevronDown size={12} className="text-fg-on-dark-ghost shrink-0" aria-hidden />
-      </div>
+      ) : (
+        <Link
+          href="/onboarding/child"
+          className="flex items-center gap-2.5 px-3 py-2.5 mb-4 rounded-[12px]
+                     bg-surface-sidebar-raised border border-on-dark
+                     hover:bg-surface-on-dark-hover transition-colors duration-fast"
+        >
+          <span
+            className="w-8 h-8 rounded-full grid place-items-center text-fg-on-dark shrink-0
+                       border border-on-dark"
+            aria-hidden
+          >
+            <Plus size={14} />
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-semibold text-fg-on-dark truncate">
+              {childLoaded ? "Set up your child" : "Opening…"}
+            </div>
+            <div className="text-[11px] mt-0.5 text-fg-on-dark-faint">
+              {childLoaded ? "Create their profile" : " "}
+            </div>
+          </div>
+        </Link>
+      )}
 
       {/* Nav */}
       <nav aria-label="Primary navigation" className="flex flex-col gap-0.5 flex-1">
@@ -208,7 +241,8 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
         <NavSection label="Account" items={ACCOUNT_NAV} />
       </nav>
 
-      {/* User footer */}
+      {/* User footer: account → settings, plus sign out right where the
+          account lives — not buried at the bottom of a settings page. */}
       <div className="mt-auto pt-3 border-t border-on-dark-subtle flex items-center gap-2.5">
         <span
           className="w-7 h-7 rounded-full grid place-items-center text-[11px] font-bold text-fg-on-dark shrink-0 bg-surface-sidebar-raised"
@@ -220,14 +254,14 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
         </span>
         <div className="min-w-0 flex-1">
           {isSupabaseConfigured() && authUser ? (
-            <>
+            <Link href="/settings" className="block min-w-0 group">
               <div className="text-fg-on-dark font-semibold truncate text-[12px]">
                 {authUser.email ?? "Signed in"}
               </div>
-              <div className="text-[11px] truncate text-fg-on-dark-faint">
+              <div className="text-[11px] truncate text-fg-on-dark-faint group-hover:text-fg-on-dark-muted transition-colors">
                 Your account
               </div>
-            </>
+            </Link>
           ) : (
             <>
               <div className="text-fg-on-dark font-semibold truncate text-[12px]">
@@ -242,6 +276,18 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
             </>
           )}
         </div>
+        {isSupabaseConfigured() && authUser ? (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            aria-label="Sign out"
+            title="Sign out"
+            className="w-8 h-8 rounded-[9px] grid place-items-center shrink-0 text-fg-on-dark-ghost
+                       hover:text-fg-on-dark hover:bg-surface-on-dark-hover transition-colors duration-fast"
+          >
+            <LogOut size={15} aria-hidden />
+          </button>
+        ) : null}
       </div>
     </aside>
   );
@@ -278,15 +324,16 @@ function DesktopTopbar() {
       {/* Right controls */}
       <div className="flex items-center gap-3 ml-auto shrink-0">
         <SyncDot state={syncState} showLabel />
-        <button
-          type="button"
+        <Link
+          href="/settings#reminders"
           className="w-9 h-9 rounded-[10px] bg-surface-card border border-border-card
                      text-fg-3 grid place-items-center hover:bg-surface-card-alt
                      transition-colors duration-fast"
-          aria-label="Notifications"
+          aria-label="Reminder settings"
+          title="Reminder settings"
         >
           <Bell size={18} aria-hidden />
-        </button>
+        </Link>
       </div>
     </div>
   );

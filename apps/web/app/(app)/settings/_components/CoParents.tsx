@@ -9,6 +9,8 @@ import {
   removeCollaborator,
   type CollaboratorRole,
 } from "@/lib/db/mutations/collaborators";
+import { isSupabaseConfigured } from "@/lib/config";
+import { inviteCollaboratorServer, removeCollaboratorServer } from "../_actions";
 
 const ROLE_LABEL: Record<string, string> = {
   owner: "You",
@@ -44,11 +46,25 @@ export function CoParents({ childId }: { childId: string | undefined }) {
     setBusy(true);
     setNote(null);
     try {
-      const res = await inviteCollaborator(db, childId, email, role);
-      setNote(res.message);
-      if (res.ok) setEmail("");
+      if (isSupabaseConfigured()) {
+        // Server first: grants real access + sends the invite email. The
+        // local mirror then uses their REAL user id, so this row and the
+        // synced one are the same person.
+        const server = await inviteCollaboratorServer({ childId, email, role });
+        if (!server.ok) {
+          setNote(server.message);
+          return;
+        }
+        await inviteCollaborator(db, childId, email, role, server.collaboratorId);
+        setNote(server.message);
+        setEmail("");
+      } else {
+        const res = await inviteCollaborator(db, childId, email, role);
+        setNote(res.message);
+        if (res.ok) setEmail("");
+      }
     } catch {
-      setNote("Couldn't add them. It's still on this device.");
+      setNote("Couldn't add them. Try again in a moment.");
     } finally {
       setBusy(false);
     }
@@ -56,11 +72,20 @@ export function CoParents({ childId }: { childId: string | undefined }) {
 
   async function remove(collaboratorId: string) {
     if (!childId) return;
+    if (isSupabaseConfigured()) {
+      // Server first — a local-only delete would be resurrected by the next
+      // sync pull.
+      const res = await removeCollaboratorServer({ childId, collaboratorId });
+      if (!res.ok) {
+        setNote(res.message);
+        return;
+      }
+    }
     await removeCollaborator(db, childId, collaboratorId);
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section id="coparents" className="flex flex-col gap-3 scroll-mt-20">
       <h2 className="text-sm font-semibold text-fg-2">Co-parents &amp; clinicians</h2>
 
       <Card alt elevation="flat" className="p-4 flex flex-col gap-3">
@@ -108,7 +133,11 @@ export function CoParents({ childId }: { childId: string | undefined }) {
             placeholder="co-parent@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            hint="They'll get access on their own device once sync is on."
+            hint={
+              isSupabaseConfigured()
+                ? "They'll get an email. Signing in with this address shows them the shared record."
+                : "They'll get access on their own device once sync is on."
+            }
           />
           <div className="flex items-center gap-2" role="group" aria-label="Their role">
             {(["co_parent", "clinician_view"] as CollaboratorRole[]).map((r) => (

@@ -57,7 +57,7 @@ export function Reminders({ childId }: { childId: string | undefined }) {
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section id="reminders" className="flex flex-col gap-3 scroll-mt-20">
       <h2 className="text-sm font-semibold text-fg-2">Dose reminders</h2>
       <Card alt elevation="flat" className="p-4 flex flex-col gap-3">
         {!configured ? (
