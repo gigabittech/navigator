@@ -39,11 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
-        {/* The CSP (set per-request in middleware) allow-lists this exact script
-            by its SHA-256 hash, so it needs no nonce — which keeps the root
-            layout static (reading headers() here would force the whole app to
-            render dynamically). Next's own scripts are covered by the nonce +
-            'strict-dynamic'. */}
+        {/* Inline on purpose: applies the saved theme before first paint (no
+            flash). Allowed by the static CSP in next.config.mjs. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>

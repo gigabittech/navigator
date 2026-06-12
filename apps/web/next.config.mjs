@@ -1,11 +1,34 @@
 const isProd = process.env.NODE_ENV === "production";
 
-// NOTE: Content-Security-Policy is NOT set here. Next.js App Router injects
-// per-request inline scripts that can't be allow-listed by a static hash, so
-// the CSP is generated per request (with a fresh nonce + 'strict-dynamic') in
-// middleware.ts. The static, request-independent security headers stay here.
+// Content-Security-Policy as a STATIC header. A per-request nonce CSP
+// (middleware-minted, 'strict-dynamic') breaks statically-prerendered pages on
+// Vercel: the CDN serves cached HTML whose script tags carry no nonce, so the
+// browser blocks every chunk and nothing hydrates — this took the live
+// sign-in page down. 'unsafe-inline' for scripts is the deliberate trade-off
+// that keeps static pages CDN-cacheable: scripts still load from this origin
+// only (foreign script injection stays blocked), React escapes rendered
+// content, and the app ships no third-party scripts. 'wasm-unsafe-eval' is
+// required for PGlite's WASM; dev adds 'unsafe-eval' for the HMR runtime.
+const supabaseOrigin = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isProd ? "" : " 'unsafe-eval'"}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""}${isProd ? "" : " ws: http://localhost:*"}`,
+  "worker-src 'self' blob:",
+  "child-src 'self' blob:",
+  "manifest-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  ...(isProd ? ["upgrade-insecure-requests"] : []),
+].join("; ");
 
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
   // Keep cross-origin isolation (required for SharedArrayBuffer / PGlite WASM).
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
